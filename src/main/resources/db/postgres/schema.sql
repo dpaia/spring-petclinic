@@ -50,3 +50,9 @@ CREATE TABLE IF NOT EXISTS visits (
   description TEXT
 );
 CREATE INDEX ON visits (pet_id);
+
+CREATE TABLE IF NOT EXISTS medication
+(
+  id UUID NOT NULL,
+  CONSTRAINT pk_medication PRIMARY KEY (id)
+);

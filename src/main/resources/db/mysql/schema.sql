@@ -53,3 +53,8 @@ CREATE TABLE IF NOT EXISTS visits (
   description VARCHAR(255),
   FOREIGN KEY (pet_id) REFERENCES pets(id)
 ) engine=InnoDB;
+
+CREATE TABLE IF NOT EXISTS medication (
+  id BINARY(16) NOT NULL,
+  CONSTRAINT pk_medication PRIMARY KEY (id)
+) engine=InnoDB;

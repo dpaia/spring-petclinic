@@ -55,6 +55,6 @@ CREATE TABLE IF NOT EXISTS visits (
 ) engine=InnoDB;
 
 CREATE TABLE IF NOT EXISTS medication (
-  id BINARY(16) NOT NULL,
+  id VARCHAR(36) NOT NULL,
   CONSTRAINT pk_medication PRIMARY KEY (id)
 ) engine=InnoDB;

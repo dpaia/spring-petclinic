@@ -66,6 +66,6 @@ CREATE INDEX visits_pet_id ON visits (pet_id);
 
 CREATE TABLE medication
 (
-  id UUID NOT NULL,
+  id VARCHAR(36) NOT NULL,
   CONSTRAINT pk_medication PRIMARY KEY (id)
 );

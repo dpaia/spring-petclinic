@@ -16,13 +16,13 @@
 package org.springframework.samples.petclinic.owner;
 
 import java.time.LocalDate;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
+import jakarta.persistence.*;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.samples.petclinic.model.BaseEntity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 
 /**
@@ -41,6 +41,18 @@ public class Visit extends BaseEntity {
 
 	@NotBlank
 	private String description;
+
+	@ElementCollection(fetch = FetchType.EAGER)
+	@CollectionTable(name = "visit_prescriptions", joinColumns = @JoinColumn(name = "visit_id"))
+	private Set<Prescription> prescription = new LinkedHashSet<>();
+
+	public Set<Prescription> getPrescription() {
+		return prescription;
+	}
+
+	public void setPrescription(Set<Prescription> prescription) {
+		this.prescription = prescription;
+	}
 
 	/**
 	 * Creates a new instance of Visit for the current date

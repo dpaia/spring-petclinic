@@ -88,6 +88,12 @@
       <scope>runtime</scope>
     </dependency>
 
+    <!-- Flyway for database migrations -->
+    <dependency>
+      <groupId>org.flywaydb</groupId>
+      <artifactId>flyway-core</artifactId>
+    </dependency>
+
     <!-- Caching -->
     <dependency>
       <groupId>javax.cache</groupId>
@@ -219,6 +225,27 @@
       <plugin>
         <groupId>org.graalvm.buildtools</groupId>
         <artifactId>native-maven-plugin</artifactId>
+        <configuration>
+          <!-- Configure native image building -->
+          <buildArgs>
+            <!-- Enable verbose output for debugging -->
+            <buildArg>-H:+ReportExceptionStackTraces</buildArg>
+            <!-- Configure Hibernate -->
+            <buildArg>--initialize-at-build-time=org.hibernate.annotations.common.reflection.java.JavaReflectionManager</buildArg>
+            <buildArg>--initialize-at-build-time=org.hibernate.annotations.common.reflection.ReflectionManager</buildArg>
+            <buildArg>--initialize-at-build-time=org.hibernate.annotations.common.reflection.java.JavaReflectionMetadataProvider</buildArg>
+            <!-- Configure H2 database -->
+            <buildArg>--initialize-at-build-time=org.h2.Driver</buildArg>
+            <buildArg>--initialize-at-build-time=org.h2.engine.Engine</buildArg>
+            <buildArg>--initialize-at-build-time=org.h2.util.DateTimeUtils</buildArg>
+            <!-- Use external reflection configuration for tests -->
+            <buildArg>-H:ReflectionConfigurationFiles=${project.basedir}/src/test/resources/META-INF/native-image/native-tests/reflection-config.json</buildArg>
+          </buildArgs>
+          <metadataRepository>
+            <!-- Enable the metadata repository for better native image support -->
+            <enabled>true</enabled>
+          </metadataRepository>
+        </configuration>
       </plugin>
       <plugin>
         <groupId>org.springframework.boot</groupId>
@@ -326,6 +353,64 @@
   </pluginRepositories>
 
   <profiles>
+    <profile>
+      <id>nativeTest</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.graalvm.buildtools</groupId>
+            <artifactId>native-maven-plugin</artifactId>
+            <configuration>
+              <!-- Configure native test execution -->
+              <resourcesConfigDirectory>${project.basedir}/src/test/resources</resourcesConfigDirectory>
+              <buildArgs>
+                <!-- Enable verbose output for debugging -->
+                <buildArg>-H:+ReportExceptionStackTraces</buildArg>
+                <!-- Configure Hibernate -->
+                <buildArg>--initialize-at-build-time=org.hibernate.annotations.common.reflection.java.JavaReflectionManager</buildArg>
+                <buildArg>--initialize-at-build-time=org.hibernate.annotations.common.reflection.ReflectionManager</buildArg>
+                <buildArg>--initialize-at-build-time=org.hibernate.annotations.common.reflection.java.JavaReflectionMetadataProvider</buildArg>
+                <buildArg>--initialize-at-build-time=org.junit.platform.commons.support.scanning.DefaultClasspathScanner</buildArg>
+                <!-- Configure H2 database -->
+                <buildArg>--initialize-at-build-time=org.h2.Driver</buildArg>
+                <buildArg>--initialize-at-build-time=org.h2.engine.Engine</buildArg>
+                <buildArg>--initialize-at-build-time=org.h2.util.DateTimeUtils</buildArg>
+                <!-- Additional args for testing -->
+                <buildArg>--no-fallback</buildArg>
+                <!-- Use external reflection configuration for tests -->
+                <buildArg>-H:ReflectionConfigurationFiles=${project.basedir}/src/test/resources/META-INF/native-image/native-tests/reflection-config.json</buildArg>
+              </buildArgs>
+              <metadataRepository>
+                <enabled>true</enabled>
+              </metadataRepository>
+              <!-- Enable native test execution -->
+              <skipNativeTests>false</skipNativeTests>
+              <quickBuild>true</quickBuild>
+            </configuration>
+            <executions>
+              <execution>
+                <id>native-test</id>
+                <goals>
+                  <goal>test</goal>
+                </goals>
+                <phase>test</phase>
+              </execution>
+            </executions>
+          </plugin>
+          <!-- Surefire configuration for native tests -->
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <configuration>
+              <!-- Include only one test class for native testing -->
+              <includes>
+                <include>**/GraalVmJpaIntegrationTest.java</include>
+              </includes>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
     <profile>
       <id>css</id>
       <build>

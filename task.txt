@@ -1,0 +1,42 @@
+# Task Breakdown
+
+## Overview
+This task involves configuring the Spring PetClinic application to compile and run as a GraalVM native image without runtime reflection errors. The goal is to ensure that Spring Data JPA, Hibernate ORM, and all entity classes work correctly in a native image environment, providing the same functionality as in a regular JVM.
+
+## Task Instructions
+The implementation requires configuring proper reflection hints for JPA entities, repositories, and proxies to ensure they work correctly in a GraalVM native image. Focus on registering all entity classes, their fields, methods, and constructors for reflection, as well as configuring Hibernate-specific settings. Additionally, ensure that database resources and SQL scripts are properly included in the native image.
+
+## Implementation Tasks
+
+1. **Update PetClinicRuntimeHints class to register all JPA entities**
+   - Register all entity classes (Pet, PetType, Visit, Owner, Vet, Specialty, etc.)
+   - Register all base classes (BaseEntity, NamedEntity, Person)
+   - Configure reflection for fields, methods, and constructors
+   - Register JPA annotations for reflection
+
+2. **Configure Hibernate-specific settings for native image**
+   - Register Hibernate proxy classes
+   - Configure reflection for Hibernate internal classes
+   - Register SQL dialect classes
+
+3. **Configure Spring Data JPA repositories for native image**
+   - Register repository interfaces (OwnerRepository, PetTypeRepository, VetRepository)
+   - Configure proxy generation for repositories
+   - Register query methods for reflection
+
+4. **Ensure database resources are included in native image**
+   - Register SQL scripts (schema.sql, data.sql)
+   - Configure database driver for native image
+   - Register database connection properties
+
+5. **Test CRUD operations in native image**
+   - Create test cases for entity creation, retrieval, update, and deletion
+   - Verify that all JPA relationships work correctly
+   - Test query methods from repositories
+
+6. **Implement challenge variation: Test with Flyway database migrations**
+   - Add Flyway dependency
+   - Configure Flyway for native image
+   - Create migration scripts
+   - Test database migration in native image
+

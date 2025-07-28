@@ -62,3 +62,14 @@ CREATE TABLE visits (
 );
 ALTER TABLE visits ADD CONSTRAINT fk_visits_pets FOREIGN KEY (pet_id) REFERENCES pets (id);
 CREATE INDEX visits_pet_id ON visits (pet_id);
+
+CREATE TABLE recipe
+(
+  id       BIGINT AUTO_INCREMENT NOT NULL,
+  text     VARCHAR(255)          NULL,
+  visit_id INT                   NULL,
+  CONSTRAINT pk_recipe PRIMARY KEY (id)
+);
+
+ALTER TABLE recipe
+  ADD CONSTRAINT FK_RECIPE_ON_VISIT FOREIGN KEY (visit_id) REFERENCES visits (id);

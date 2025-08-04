@@ -62,7 +62,7 @@ class VisitController {
 	@ModelAttribute("visit")
 	public Visit loadPetWithVisit(@PathVariable("ownerId") int ownerId, @PathVariable("petId") int petId,
 			Map<String, Object> model) {
-		Optional<Owner> optionalOwner = owners.findById(ownerId);
+		Optional<Owner> optionalOwner = owners.findById(ownerId).blockOptional();
 		Owner owner = optionalOwner.orElseThrow(() -> new IllegalArgumentException(
 				"Owner not found with id: " + ownerId + ". Please ensure the ID is correct "));
 
@@ -92,7 +92,7 @@ class VisitController {
 		}
 
 		owner.addVisit(petId, visit);
-		this.owners.save(owner);
+		this.owners.save(owner).block();
 		redirectAttributes.addFlashAttribute("message", "Your visit has been booked");
 		return "redirect:/owners/{ownerId}";
 	}

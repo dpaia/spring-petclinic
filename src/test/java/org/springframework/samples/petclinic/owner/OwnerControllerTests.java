@@ -28,6 +28,8 @@ import org.springframework.test.context.aot.DisabledInAotMode;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -92,9 +94,9 @@ class OwnerControllerTests {
 
 		Owner george = george();
 		given(this.owners.findByLastNameStartingWith(eq("Franklin"), any(Pageable.class)))
-			.willReturn(new PageImpl<>(List.of(george)));
+			.willReturn(Flux.just(george));
 
-		given(this.owners.findById(TEST_OWNER_ID)).willReturn(Optional.of(george));
+		given(this.owners.findById(TEST_OWNER_ID)).willReturn(Mono.just(george));
 		Visit visit = new Visit();
 		visit.setDate(LocalDate.now());
 		george.getPet("Max").getVisits().add(visit);
@@ -111,6 +113,10 @@ class OwnerControllerTests {
 
 	@Test
 	void testProcessCreationFormSuccess() throws Exception {
+		var newOwner = new Owner();
+		newOwner.setId(1);
+		given(this.owners.save(any(Owner.class))).willReturn(Mono.just(new Owner()));
+
 		mockMvc
 			.perform(post("/owners/new").param("firstName", "Joe")
 				.param("lastName", "Bloggs")
@@ -141,14 +147,14 @@ class OwnerControllerTests {
 
 	@Test
 	void testProcessFindFormSuccess() throws Exception {
-		Page<Owner> tasks = new PageImpl<>(List.of(george(), new Owner()));
+		Flux<Owner> tasks = Flux.just(george(), new Owner());
 		when(this.owners.findByLastNameStartingWith(anyString(), any(Pageable.class))).thenReturn(tasks);
 		mockMvc.perform(get("/owners?page=1")).andExpect(status().isOk()).andExpect(view().name("owners/ownersList"));
 	}
 
 	@Test
 	void testProcessFindFormByLastName() throws Exception {
-		Page<Owner> tasks = new PageImpl<>(List.of(george()));
+		Flux<Owner> tasks = Flux.just(george());
 		when(this.owners.findByLastNameStartingWith(eq("Franklin"), any(Pageable.class))).thenReturn(tasks);
 		mockMvc.perform(get("/owners?page=1").param("lastName", "Franklin"))
 			.andExpect(status().is3xxRedirection())
@@ -157,7 +163,7 @@ class OwnerControllerTests {
 
 	@Test
 	void testProcessFindFormNoOwnersFound() throws Exception {
-		Page<Owner> tasks = new PageImpl<>(List.of());
+		Flux<Owner> tasks = Flux.just();
 		when(this.owners.findByLastNameStartingWith(eq("Unknown Surname"), any(Pageable.class))).thenReturn(tasks);
 		mockMvc.perform(get("/owners?page=1").param("lastName", "Unknown Surname"))
 			.andExpect(status().isOk())
@@ -182,6 +188,10 @@ class OwnerControllerTests {
 
 	@Test
 	void testProcessUpdateOwnerFormSuccess() throws Exception {
+		var newOwner = new Owner();
+		newOwner.setId(TEST_OWNER_ID);
+		given(this.owners.save(any(Owner.class))).willReturn(Mono.just(new Owner()));
+
 		mockMvc
 			.perform(post("/owners/{ownerId}/edit", TEST_OWNER_ID).param("firstName", "Joe")
 				.param("lastName", "Bloggs")
@@ -194,6 +204,10 @@ class OwnerControllerTests {
 
 	@Test
 	void testProcessUpdateOwnerFormUnchangedSuccess() throws Exception {
+		var newOwner = new Owner();
+		newOwner.setId(TEST_OWNER_ID);
+		given(this.owners.save(any(Owner.class))).willReturn(Mono.just(new Owner()));
+
 		mockMvc.perform(post("/owners/{ownerId}/edit", TEST_OWNER_ID))
 			.andExpect(status().is3xxRedirection())
 			.andExpect(view().name("redirect:/owners/{ownerId}"));
@@ -240,7 +254,7 @@ class OwnerControllerTests {
 		owner.setCity("New York");
 		owner.setTelephone("0123456789");
 
-		when(owners.findById(pathOwnerId)).thenReturn(Optional.of(owner));
+		when(owners.findById(pathOwnerId)).thenReturn(Mono.just(owner));
 
 		mockMvc.perform(MockMvcRequestBuilders.post("/owners/{ownerId}/edit", pathOwnerId).flashAttr("owner", owner))
 			.andExpect(status().is3xxRedirection())

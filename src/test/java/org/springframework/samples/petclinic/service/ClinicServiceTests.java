@@ -138,7 +138,7 @@ class ClinicServiceTests {
 
 	@Test
 	void shouldFindAllPetTypes() {
-		Collection<PetType> petTypes = this.types.findPetTypes().collectList().block();
+		Collection<PetType> petTypes = this.types.findAllByOrderByName().collectList().block();
 
 		PetType petType1 = EntityUtils.getById(petTypes, PetType.class, 1);
 		assertThat(petType1.getName()).isEqualTo("cat");
@@ -157,7 +157,7 @@ class ClinicServiceTests {
 
 		Pet pet = new Pet();
 		pet.setName("bowser");
-		Collection<PetType> types = this.types.findPetTypes().collectList().block();
+		Collection<PetType> types = this.types.findAllByOrderByName().collectList().block();
 		pet.setType(EntityUtils.getById(types, PetType.class, 2));
 		pet.setBirthDate(LocalDate.now());
 		owner6.addPet(pet);

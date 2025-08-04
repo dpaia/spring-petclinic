@@ -32,7 +32,6 @@ public interface PetTypeRepository extends R2dbcRepository<PetType, Integer> {
 	 * Retrieve all {@link PetType}s from the data store ordered by name.
 	 * @return a Flux of {@link PetType}s.
 	 */
-	@Query("SELECT ptype FROM PetType ptype ORDER BY ptype.name")
-	Flux<PetType> findPetTypes();
+	Flux<PetType> findAllByOrderByName();
 
 }

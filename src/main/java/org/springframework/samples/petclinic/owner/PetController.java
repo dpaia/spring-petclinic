@@ -57,7 +57,7 @@ class PetController {
 
 	@ModelAttribute("types")
 	public Collection<PetType> populatePetTypes() {
-		return this.types.findPetTypes().collectList().block();
+		return this.types.findAllByOrderByName().collectList().block();
 	}
 
 	@ModelAttribute("owner")

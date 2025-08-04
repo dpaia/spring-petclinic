@@ -70,7 +70,7 @@ class PetControllerTests {
 		PetType cat = new PetType();
 		cat.setId(3);
 		cat.setName("hamster");
-		given(this.types.findPetTypes()).willReturn(Flux.just(cat));
+		given(this.types.findAllByOrderByName()).willReturn(Flux.just(cat));
 
 		Owner owner = new Owner();
 		Pet pet = new Pet();

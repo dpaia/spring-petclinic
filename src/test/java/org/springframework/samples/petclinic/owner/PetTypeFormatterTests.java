@@ -51,6 +51,11 @@ class PetTypeFormatterTests {
 	@BeforeEach
 	void setup() {
 		this.petTypeFormatter = new PetTypeFormatter(types);
+
+		// Setup for shouldParse test - populate the cache
+		given(types.findAllByOrderByName()).willReturn(makePetTypes());
+		// Manually trigger cache population
+		petTypeFormatter.onApplicationEvent(null);
 	}
 
 	@Test
@@ -63,14 +68,12 @@ class PetTypeFormatterTests {
 
 	@Test
 	void shouldParse() throws ParseException {
-		given(types.findPetTypes()).willReturn(makePetTypes());
 		PetType petType = petTypeFormatter.parse("Bird", Locale.ENGLISH);
 		assertThat(petType.getName()).isEqualTo("Bird");
 	}
 
 	@Test
 	void shouldThrowParseException() {
-		given(types.findPetTypes()).willReturn(makePetTypes());
 		Assertions.assertThrows(ParseException.class, () -> {
 			petTypeFormatter.parse("Fish", Locale.ENGLISH);
 		});

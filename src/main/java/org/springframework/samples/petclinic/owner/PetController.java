@@ -116,7 +116,10 @@ class PetController {
 		}
 
 		owner.addPet(pet);
-		this.owners.save(owner).block();
+		var saveMono = this.owners.save(owner);
+		if (saveMono != null) {
+			saveMono.block();
+		}
 		redirectAttributes.addFlashAttribute("message", "New Pet has been Added");
 		return "redirect:/owners/{ownerId}";
 	}
@@ -170,7 +173,10 @@ class PetController {
 		else {
 			owner.addPet(pet);
 		}
-		this.owners.save(owner).block();
+		var saveMono = this.owners.save(owner);
+		if (saveMono != null) {
+			saveMono.block();
+		}
 	}
 
 }

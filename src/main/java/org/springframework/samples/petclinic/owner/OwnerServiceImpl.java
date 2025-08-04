@@ -18,10 +18,12 @@ package org.springframework.samples.petclinic.owner;
 import jakarta.annotation.Nullable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Service
+@Transactional(readOnly = true)
 public class OwnerServiceImpl implements OwnerService {
 
 	private final OwnerRepository ownerRepository;
@@ -40,6 +42,7 @@ public class OwnerServiceImpl implements OwnerService {
 	}
 
 	@Override
+	@Transactional
 	public Mono<Owner> save(Owner owner) {
 		return ownerRepository.save(owner);
 	}

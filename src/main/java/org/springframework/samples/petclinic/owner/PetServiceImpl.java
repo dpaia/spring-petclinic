@@ -16,10 +16,12 @@
 package org.springframework.samples.petclinic.owner;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Service
+@Transactional(readOnly = true)
 public class PetServiceImpl implements PetService {
 
 	private final PetRepository petRepository;
@@ -67,6 +69,7 @@ public class PetServiceImpl implements PetService {
 	}
 
 	@Override
+	@Transactional
 	public Mono<Pet> save(Owner owner, Pet pet) {
 		pet.setOwnerId(owner.getId());
 		return petRepository.save(pet);

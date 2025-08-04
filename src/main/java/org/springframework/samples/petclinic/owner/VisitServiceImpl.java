@@ -16,9 +16,11 @@
 package org.springframework.samples.petclinic.owner;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Mono;
 
 @Service
+@Transactional(readOnly = true)
 public class VisitServiceImpl implements VisitService {
 
 	private final VisitRepository visitRepository;
@@ -28,6 +30,7 @@ public class VisitServiceImpl implements VisitService {
 	}
 
 	@Override
+	@Transactional
 	public Mono<Visit> save(Visit visit) {
 		return visitRepository.save(visit);
 	}

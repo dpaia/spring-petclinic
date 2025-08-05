@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.util.function.Tuple2;
 
 import java.util.List;
 import java.util.Map;
@@ -51,8 +52,9 @@ public class VetServiceImpl implements VetService {
 	}
 
 	@Override
-	public Flux<Vet> findAllPaginatedReactive(Pageable pageable) {
-		return vetRepository.findAllBy(pageable).flatMap(this::load);
+	public Mono<Tuple2<List<Vet>, Long>> findAllPaginatedReactive(Pageable pageable) {
+		Flux<Vet> vets = vetRepository.findAllBy(pageable).flatMap(this::load);
+		return vets.collectList().zipWith(vetRepository.count());
 	}
 
 	private Mono<Vet> load(Vet vet) {

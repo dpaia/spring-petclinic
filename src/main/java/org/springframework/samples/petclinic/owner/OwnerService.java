@@ -17,15 +17,17 @@ package org.springframework.samples.petclinic.owner;
 
 import jakarta.annotation.Nullable;
 import org.springframework.data.domain.Pageable;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.util.function.Tuple2;
+
+import java.util.List;
 
 /**
  * Service for {@link Owner} domain objects.
  */
 public interface OwnerService {
 
-	Flux<Owner> findByLastNameStartingWithReactive(@Nullable String lastName, Pageable pageable);
+	Mono<Tuple2<List<Owner>, Long>> findByLastNameStartingWithReactive(@Nullable String lastName, Pageable pageable);
 
 	Mono<Owner> save(Owner owner);
 

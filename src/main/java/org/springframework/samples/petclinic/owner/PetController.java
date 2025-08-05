@@ -16,11 +16,8 @@
 package org.springframework.samples.petclinic.owner;
 
 import java.time.LocalDate;
-import java.util.Collection;
-import java.util.Optional;
 
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.ModelMap;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.WebDataBinder;
@@ -30,9 +27,11 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.server.ServerWebExchange;
 
 import jakarta.validation.Valid;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 /**
  * @author Juergen Hoeller
@@ -46,40 +45,41 @@ class PetController {
 
 	private static final String VIEWS_PETS_CREATE_OR_UPDATE_FORM = "pets/createOrUpdatePetForm";
 
-	private final OwnerRepository owners;
+	private final OwnerService ownerService;
+
+	private final PetService petService;
 
 	private final PetTypeRepository types;
 
-	public PetController(OwnerRepository owners, PetTypeRepository types) {
-		this.owners = owners;
+	public PetController(OwnerService ownerService, PetTypeRepository types, PetService petService) {
+		this.ownerService = ownerService;
 		this.types = types;
+		this.petService = petService;
 	}
 
 	@ModelAttribute("types")
-	public Collection<PetType> populatePetTypes() {
-		return this.types.findAllByOrderByName().collectList().block();
+	public Flux<PetType> populatePetTypes() {
+		return this.types.findAllByOrderByName();
 	}
 
 	@ModelAttribute("owner")
-	public Owner findOwner(@PathVariable("ownerId") int ownerId) {
-		Optional<Owner> optionalOwner = this.owners.findById(ownerId).blockOptional();
-		Owner owner = optionalOwner.orElseThrow(() -> new IllegalArgumentException(
-				"Owner not found with id: " + ownerId + ". Please ensure the ID is correct "));
-		return owner;
+	public Mono<Owner> findOwner(@PathVariable("ownerId") int ownerId) {
+		return this.ownerService.findByIdReactive(ownerId)
+			.switchIfEmpty(Mono.error(new IllegalArgumentException(
+					"Owner not found with id: " + ownerId + ". Please ensure the ID is correct ")));
 	}
 
 	@ModelAttribute("pet")
-	public Pet findPet(@PathVariable("ownerId") int ownerId,
+	public Mono<Pet> findPet(@PathVariable("ownerId") int ownerId,
 			@PathVariable(name = "petId", required = false) Integer petId) {
 
 		if (petId == null) {
-			return new Pet();
+			return Mono.just(new Pet());
 		}
 
-		Optional<Owner> optionalOwner = this.owners.findById(ownerId).blockOptional();
-		Owner owner = optionalOwner.orElseThrow(() -> new IllegalArgumentException(
-				"Owner not found with id: " + ownerId + ". Please ensure the ID is correct "));
-		return owner.getPet(petId);
+		return this.petService.findByIdAndOwnerId(petId, ownerId)
+			.switchIfEmpty(Mono.error(new IllegalArgumentException("Pet not found with id: " + petId
+					+ ". Please ensure the ID is correct " + "and the pet exists in the database.")));
 	}
 
 	@InitBinder("owner")
@@ -93,18 +93,13 @@ class PetController {
 	}
 
 	@GetMapping("/pets/new")
-	public String initCreationForm(Owner owner, ModelMap model) {
-		Pet pet = new Pet();
-		owner.addPet(pet);
-		return VIEWS_PETS_CREATE_OR_UPDATE_FORM;
+	public Mono<String> initCreationForm(Mono<Owner> owner) {
+		return Mono.just(VIEWS_PETS_CREATE_OR_UPDATE_FORM);
 	}
 
 	@PostMapping("/pets/new")
-	public String processCreationForm(Owner owner, @Valid Pet pet, BindingResult result,
-			RedirectAttributes redirectAttributes) {
-
-		if (StringUtils.hasText(pet.getName()) && pet.isNew() && owner.getPet(pet.getName(), true) != null)
-			result.rejectValue("name", "duplicate", "already exists");
+	public Mono<String> processCreationForm(@ModelAttribute("owner") Mono<Owner> owner, @Valid Pet pet,
+			BindingResult result, ServerWebExchange exchange) {
 
 		LocalDate currentDate = LocalDate.now();
 		if (pet.getBirthDate() != null && pet.getBirthDate().isAfter(currentDate)) {
@@ -112,71 +107,57 @@ class PetController {
 		}
 
 		if (result.hasErrors()) {
-			return VIEWS_PETS_CREATE_OR_UPDATE_FORM;
+			return Mono.just(VIEWS_PETS_CREATE_OR_UPDATE_FORM);
 		}
 
-		owner.addPet(pet);
-		var saveMono = this.owners.save(owner);
-		if (saveMono != null) {
-			saveMono.block();
-		}
-		redirectAttributes.addFlashAttribute("message", "New Pet has been Added");
-		return "redirect:/owners/{ownerId}";
+		return owner.flatMap(o -> {
+			if (StringUtils.hasText(pet.getName()) && pet.isNew() && o.getPet(pet.getName(), true) != null) {
+				result.rejectValue("name", "duplicate", "already exists");
+				return Mono.just(VIEWS_PETS_CREATE_OR_UPDATE_FORM);
+			}
+
+			return this.petService.save(o, pet)
+				.flatMap(savedPet -> exchange.getSession()
+					.doOnNext(session -> session.getAttributes().put("message", "New Pet has been Added"))
+					.then(Mono.just("redirect:/owners/{ownerId}")));
+		});
 	}
 
 	@GetMapping("/pets/{petId}/edit")
-	public String initUpdateForm() {
-		return VIEWS_PETS_CREATE_OR_UPDATE_FORM;
+	public Mono<String> initUpdateForm() {
+		return Mono.just(VIEWS_PETS_CREATE_OR_UPDATE_FORM);
 	}
 
 	@PostMapping("/pets/{petId}/edit")
-	public String processUpdateForm(Owner owner, @Valid Pet pet, BindingResult result,
-			RedirectAttributes redirectAttributes) {
+	public Mono<String> processUpdateForm(@ModelAttribute("owner") Mono<Owner> owner, @Valid Pet pet,
+			BindingResult result, ServerWebExchange exchange) {
 
 		String petName = pet.getName();
-
-		// checking if the pet name already exists for the owner
-		if (StringUtils.hasText(petName)) {
-			Pet existingPet = owner.getPet(petName, false);
-			if (existingPet != null && !existingPet.getId().equals(pet.getId())) {
-				result.rejectValue("name", "duplicate", "already exists");
-			}
-		}
-
 		LocalDate currentDate = LocalDate.now();
+
 		if (pet.getBirthDate() != null && pet.getBirthDate().isAfter(currentDate)) {
 			result.rejectValue("birthDate", "typeMismatch.birthDate");
 		}
 
 		if (result.hasErrors()) {
-			return VIEWS_PETS_CREATE_OR_UPDATE_FORM;
+			return Mono.just(VIEWS_PETS_CREATE_OR_UPDATE_FORM);
 		}
 
-		updatePetDetails(owner, pet);
-		redirectAttributes.addFlashAttribute("message", "Pet details has been edited");
-		return "redirect:/owners/{ownerId}";
-	}
+		return owner.flatMap(o -> {
+			// Check if pet name already exists for another pet
+			if (StringUtils.hasText(petName)) {
+				Pet existingPet = o.getPet(petName, false);
+				if (existingPet != null && !existingPet.getId().equals(pet.getId())) {
+					result.rejectValue("name", "duplicate", "already exists");
+					return Mono.just(VIEWS_PETS_CREATE_OR_UPDATE_FORM);
+				}
+			}
 
-	/**
-	 * Updates the pet details if it exists or adds a new pet to the owner.
-	 * @param owner The owner of the pet
-	 * @param pet The pet with updated details
-	 */
-	private void updatePetDetails(Owner owner, Pet pet) {
-		Pet existingPet = owner.getPet(pet.getId());
-		if (existingPet != null) {
-			// Update existing pet's properties
-			existingPet.setName(pet.getName());
-			existingPet.setBirthDate(pet.getBirthDate());
-			existingPet.setType(pet.getType());
-		}
-		else {
-			owner.addPet(pet);
-		}
-		var saveMono = this.owners.save(owner);
-		if (saveMono != null) {
-			saveMono.block();
-		}
+			return this.petService.save(o, pet)
+				.flatMap(updatedPet -> exchange.getSession()
+					.doOnNext(session -> session.getAttributes().put("message", "Pet details has been edited"))
+					.then(Mono.just("redirect:/owners/{ownerId}")));
+		});
 	}
 
 }

@@ -16,85 +16,56 @@
 
 package org.springframework.samples.petclinic.vet;
 
-import org.assertj.core.util.Lists;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledInNativeImage;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.samples.petclinic.system.TestEnglishLocaleConfig;
 import org.springframework.test.context.aot.DisabledInAotMode;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import reactor.core.publisher.Flux;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import org.springframework.test.web.reactive.server.WebTestClient;
 
 /**
  * Test class for the {@link VetController}
  */
-
-@WebMvcTest(VetController.class)
+@Import(TestEnglishLocaleConfig.class)
+@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @DisabledInNativeImage
 @DisabledInAotMode
 class VetControllerTests {
 
 	@Autowired
-	private MockMvc mockMvc;
+	private WebTestClient webTestClient;
 
-	@MockitoBean
-	private VetRepository vets;
-
-	private Vet james() {
-		Vet james = new Vet();
-		james.setFirstName("James");
-		james.setLastName("Carter");
-		james.setId(1);
-		return james;
-	}
-
-	private Vet helen() {
-		Vet helen = new Vet();
-		helen.setFirstName("Helen");
-		helen.setLastName("Leary");
-		helen.setId(2);
-		Specialty radiology = new Specialty();
-		radiology.setId(1);
-		radiology.setName("radiology");
-		helen.addSpecialty(radiology);
-		return helen;
-	}
-
-	@BeforeEach
-	void setup() {
-		given(this.vets.findAll()).willReturn(Flux.just(james(), helen()));
-		given(this.vets.findAllBy(any(Pageable.class))).willReturn(Flux.just(james(), helen()));
-
+	@Test
+	void testShowVetListHtml() {
+		webTestClient.get()
+			.uri("/vets.html?page=1")
+			.exchange()
+			.expectStatus()
+			.isOk()
+			.expectBody()
+			.xpath("//h2[contains(text(), 'Veterinarians')]")
+			.exists()
+			.xpath("//table[@id='vets']")
+			.exists();
 	}
 
 	@Test
-	void testShowVetListHtml() throws Exception {
-
-		mockMvc.perform(MockMvcRequestBuilders.get("/vets.html?page=1"))
-			.andExpect(status().isOk())
-			.andExpect(model().attributeExists("listVets"))
-			.andExpect(view().name("vets/vetList"));
-
-	}
-
-	@Test
-	void testShowResourcesVetList() throws Exception {
-		ResultActions actions = mockMvc.perform(get("/vets").accept(MediaType.APPLICATION_JSON))
-			.andExpect(status().isOk());
-		actions.andExpect(content().contentType(MediaType.APPLICATION_JSON))
-			.andExpect(jsonPath("$.vetList[0].id").value(1));
+	void testShowResourcesVetList() {
+		webTestClient.get()
+			.uri("/vets")
+			.accept(MediaType.APPLICATION_JSON)
+			.exchange()
+			.expectStatus()
+			.isOk()
+			.expectHeader()
+			.contentType(MediaType.APPLICATION_JSON)
+			.expectBody()
+			.jsonPath("$.vetList[0].id")
+			.isEqualTo(1);
 	}
 
 }

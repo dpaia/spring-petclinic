@@ -16,25 +16,16 @@
 
 package org.springframework.samples.petclinic.owner;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
-
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledInNativeImage;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.http.MediaType;
+import org.springframework.samples.petclinic.system.TestEnglishLocaleConfig;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.aot.DisabledInAotMode;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.web.servlet.MockMvc;
-import reactor.core.publisher.Mono;
-
-import java.util.Optional;
+import org.springframework.test.web.reactive.server.WebTestClient;
 
 /**
  * Test class for {@link VisitController}
@@ -42,7 +33,8 @@ import java.util.Optional;
  * @author Colin But
  * @author Wick Dynex
  */
-@WebMvcTest(VisitController.class)
+@Import(TestEnglishLocaleConfig.class)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DisabledInNativeImage
 @DisabledInAotMode
 class VisitControllerTests {
@@ -52,49 +44,56 @@ class VisitControllerTests {
 	private static final int TEST_PET_ID = 1;
 
 	@Autowired
-	private MockMvc mockMvc;
+	private WebTestClient webTestClient;
 
-	@MockitoBean
-	private OwnerRepository owners;
-
-	@BeforeEach
-	void init() {
-		Owner owner = new Owner();
-		Pet pet = new Pet();
-		owner.addPet(pet);
-		pet.setId(TEST_PET_ID);
-		given(this.owners.findById(TEST_OWNER_ID)).willReturn(Mono.just(owner));
+	@Test
+	void testInitNewVisitForm() {
+		webTestClient.get()
+			.uri("/owners/{ownerId}/pets/{petId}/visits/new", TEST_OWNER_ID, TEST_PET_ID)
+			.exchange()
+			.expectStatus()
+			.isOk()
+			.expectBody()
+			.xpath("//form[@class='form-horizontal']")
+			.exists()
+			.xpath("//input[@id='date']/@value")
+			.exists()
+			.xpath("//input[@id='description']")
+			.exists();
 	}
 
 	@Test
-	void testInitNewVisitForm() throws Exception {
-		mockMvc.perform(get("/owners/{ownerId}/pets/{petId}/visits/new", TEST_OWNER_ID, TEST_PET_ID))
-			.andExpect(status().isOk())
-			.andExpect(view().name("pets/createOrUpdateVisitForm"));
+	@DirtiesContext
+	void testProcessNewVisitFormSuccess() {
+		webTestClient.post()
+			.uri("/owners/{ownerId}/pets/{petId}/visits/new", TEST_OWNER_ID, TEST_PET_ID)
+			.contentType(MediaType.APPLICATION_FORM_URLENCODED)
+			.bodyValue("date=2025-08-01&description=Visit+Description")
+			.exchange()
+			.expectStatus()
+			.is3xxRedirection()
+			.expectHeader()
+			.valueEquals("Location", "/owners/" + TEST_OWNER_ID);
 	}
 
 	@Test
-	void testProcessNewVisitFormSuccess() throws Exception {
-		var newOwner = new Owner();
-		newOwner.setId(TEST_OWNER_ID);
-		given(this.owners.save(any(Owner.class))).willReturn(Mono.just(new Owner()));
-
-		mockMvc
-			.perform(post("/owners/{ownerId}/pets/{petId}/visits/new", TEST_OWNER_ID, TEST_PET_ID)
-				.param("name", "George")
-				.param("description", "Visit Description"))
-			.andExpect(status().is3xxRedirection())
-			.andExpect(view().name("redirect:/owners/{ownerId}"));
-	}
-
-	@Test
-	void testProcessNewVisitFormHasErrors() throws Exception {
-		mockMvc
-			.perform(post("/owners/{ownerId}/pets/{petId}/visits/new", TEST_OWNER_ID, TEST_PET_ID).param("name",
-					"George"))
-			.andExpect(model().attributeHasErrors("visit"))
-			.andExpect(status().isOk())
-			.andExpect(view().name("pets/createOrUpdateVisitForm"));
+	void testProcessNewVisitFormHasErrors() {
+		webTestClient.post()
+			.uri("/owners/{ownerId}/pets/{petId}/visits/new", TEST_OWNER_ID, TEST_PET_ID)
+			.contentType(MediaType.APPLICATION_FORM_URLENCODED)
+			.bodyValue("date=2025-08-01")
+			.exchange()
+			.expectStatus()
+			.isOk()
+			.expectBody()
+			.xpath("//form[@class='form-horizontal']")
+			.exists()
+			.xpath("//input[@id='date']/@value")
+			.isEqualTo("2025-08-01")
+			.xpath("//input[@id='description']/ancestor::div[contains(@class, 'has-error')]")
+			.exists()
+			.xpath("//input[@id='description']/ancestor::div//span[@class='help-inline'][contains(text(), 'must not be blank')]")
+			.exists();
 	}
 
 }

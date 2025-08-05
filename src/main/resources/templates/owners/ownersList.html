@@ -19,7 +19,7 @@
     <tbody>
       <tr th:each="owner : ${listOwners}">
         <td>
-          <a th:href="@{/owners/__${owner.id}__}" th:text="${owner.firstName + ' ' + owner.lastName}" /></a>
+          <a th:href="@{/owners/__${owner.id}__}" th:text="${owner.firstName + ' ' + owner.lastName}" />
         </td>
         <td th:text="${owner.address}" />
         <td th:text="${owner.city}" />
@@ -35,7 +35,7 @@
       <a th:if="${currentPage != i}" th:href="@{'/owners?page=' + ${i}}">[[${i}]]</a>
       <span th:unless="${currentPage != i}">[[${i}]]</span>
     </span>
-    <span>]&nbsp;</span>
+    <span>]&#160;</span>
     <span>
       <a th:if="${currentPage > 1}" th:href="@{'/owners?page=1'}" th:title="#{first}" class="fa fa-fast-backward"></a>
       <span th:unless="${currentPage > 1}" th:title="#{first}" class="fa fa-fast-backward"></span>

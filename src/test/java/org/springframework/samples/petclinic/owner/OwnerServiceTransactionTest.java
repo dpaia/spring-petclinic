@@ -20,11 +20,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.samples.petclinic.system.TestTransactionConfig;
+import org.springframework.test.context.aot.DisabledInAotMode;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Import(TestTransactionConfig.class)
 @SpringBootTest
+@DisabledInAotMode
 public class OwnerServiceTransactionTest {
 
 	@Autowired

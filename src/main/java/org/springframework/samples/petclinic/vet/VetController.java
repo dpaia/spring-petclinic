@@ -17,7 +17,6 @@ package org.springframework.samples.petclinic.vet;
 
 import java.util.List;
 
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
@@ -25,6 +24,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 /**
  * @author Juergen Hoeller
@@ -35,20 +36,20 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @Controller
 class VetController {
 
-	private final VetRepository vetRepository;
+	private static final int PAGE_SIZE = 5;
 
-	public VetController(VetRepository vetRepository) {
-		this.vetRepository = vetRepository;
+	private final VetService vetService;
+
+	public VetController(VetService vetService) {
+		this.vetService = vetService;
 	}
 
 	@GetMapping("/vets.html")
-	public String showVetList(@RequestParam(defaultValue = "1") int page, Model model) {
+	public Mono<String> showVetList(@RequestParam(defaultValue = "1") int page, Model model) {
 		// Here we are returning an object of type 'Vets' rather than a collection of Vet
 		// objects so it is simpler for Object-Xml mapping
-		Vets vets = new Vets();
-		List<Vet> paginated = findPaginated(page);
-		vets.getVetList().addAll(paginated);
-		return addPaginationModel(page, paginated, model);
+		Flux<Vet> vets = findPaginatedReactive(page);
+		return vets.collectList().map(listVets -> addPaginationModel(page, listVets, model));
 	}
 
 	private String addPaginationModel(int page, List<Vet> listVets, Model model) {
@@ -59,19 +60,17 @@ class VetController {
 		return "vets/vetList";
 	}
 
-	private List<Vet> findPaginated(int page) {
-		int pageSize = 5;
-		Pageable pageable = PageRequest.of(page - 1, pageSize);
-		return vetRepository.findAllBy(pageable).collectList().block();
+	private Flux<Vet> findPaginatedReactive(int page) {
+		Pageable pageable = PageRequest.of(page - 1, PAGE_SIZE);
+		return vetService.findAllPaginatedReactive(pageable);
 	}
 
 	@GetMapping({ "/vets" })
-	public @ResponseBody Vets showResourcesVetList() {
+	@ResponseBody
+	public Mono<Vets> showResourcesVetList() {
 		// Here we are returning an object of type 'Vets' rather than a collection of Vet
 		// objects so it is simpler for JSon/Object mapping
-		Vets vets = new Vets();
-		vets.getVetList().addAll(this.vetRepository.findAll().collectList().block());
-		return vets;
+		return vetService.getVetsAsListReactive();
 	}
 
 }

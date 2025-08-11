@@ -27,13 +27,13 @@ public class RestTemplateConfig {
 
 	@Bean
 	public RestTemplate customRestTemplate(RestTemplateBuilder builder) {
-		return builder.setConnectTimeout(Duration.ofSeconds(30)).setReadTimeout(Duration.ofSeconds(60))
+		return builder.connectTimeout(Duration.ofSeconds(30)).readTimeout(Duration.ofSeconds(60))
 				.rootUri("https://petclinic-api.example.com").build();
 	}
 
 	@Bean("externalApiRestTemplate")
 	public RestTemplate externalApiRestTemplate(RestTemplateBuilder builder) {
-		return builder.setConnectTimeout(Duration.ofSeconds(10)).setReadTimeout(Duration.ofSeconds(30))
+		return builder.connectTimeout(Duration.ofSeconds(10)).readTimeout(Duration.ofSeconds(30))
 				.rootUri("https://api.example.com").build();
 	}
 

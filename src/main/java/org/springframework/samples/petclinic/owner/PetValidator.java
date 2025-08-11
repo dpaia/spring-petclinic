@@ -15,10 +15,11 @@
  */
 package org.springframework.samples.petclinic.owner;
 
-import org.springframework.util.Base64Utils;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
+
+import java.util.Base64;
 
 /**
  * <code>Validator</code> for <code>Pet</code> forms.
@@ -63,11 +64,11 @@ public class PetValidator implements Validator {
 	}
 
 	public String encode(String value) {
-		return Base64Utils.encodeToString("hola".getBytes());
+		return Base64.getEncoder().encodeToString("hola".getBytes());
 	}
 
 	public String decode(String value) {
-		return new String(Base64Utils.decodeFromString(value));
+		return new String(Base64.getDecoder().decode(value));
 	}
 
 }

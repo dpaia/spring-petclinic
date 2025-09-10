@@ -219,10 +219,27 @@
       <plugin>
         <groupId>org.graalvm.buildtools</groupId>
         <artifactId>native-maven-plugin</artifactId>
+        <configuration>
+          <buildArgs>
+            <buildArg>--no-fallback</buildArg>
+            <buildArg>-H:+ReportExceptionStackTraces</buildArg>
+          </buildArgs>
+          <metadataRepository>
+            <enabled>true</enabled>
+          </metadataRepository>
+        </configuration>
       </plugin>
       <plugin>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
+        <configuration>
+          <image>
+            <builder>paketobuildpacks/builder-jammy-tiny:latest</builder>
+            <env>
+              <BP_NATIVE_IMAGE>true</BP_NATIVE_IMAGE>
+            </env>
+          </image>
+        </configuration>
         <executions>
           <execution>
             <!-- Spring Boot Actuator displays build-related information
@@ -441,6 +458,41 @@
             </plugin>
           </plugins>
         </pluginManagement>
+      </build>
+    </profile>
+    <profile>
+      <id>nativeTest</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.graalvm.buildtools</groupId>
+            <artifactId>native-maven-plugin</artifactId>
+            <configuration>
+              <!-- Configure native test execution -->
+              <resourcesConfigDirectory>${project.basedir}/src/test/resources</resourcesConfigDirectory>
+              <buildArgs>
+                <!-- Enable verbose output for debugging -->
+                <buildArg>-H:+ReportExceptionStackTraces</buildArg>
+                <buildArg>--no-fallback</buildArg>
+              </buildArgs>
+              <metadataRepository>
+                <enabled>true</enabled>
+              </metadataRepository>
+              <!-- Enable native test execution -->
+              <skipNativeTests>false</skipNativeTests>
+              <quickBuild>true</quickBuild>
+            </configuration>
+            <executions>
+              <execution>
+                <id>native-test</id>
+                <goals>
+                  <goal>test</goal>
+                </goals>
+                <phase>test</phase>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
       </build>
     </profile>
   </profiles>

@@ -1,0 +1,15 @@
+{
+  "resources": {
+    "includes": [
+      {
+        "pattern": "db/.*"
+      },
+      {
+        "pattern": "messages/.*"
+      },
+      {
+        "pattern": "mysql-default-conf"
+      }
+    ]
+  }
+}

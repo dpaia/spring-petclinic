@@ -16,8 +16,13 @@
 
 package org.springframework.samples.petclinic;
 
+import java.util.List;
+
+import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
+import org.springframework.aot.hint.TypeReference;
+import org.springframework.samples.petclinic.breed.BreedService;
 import org.springframework.samples.petclinic.model.BaseEntity;
 import org.springframework.samples.petclinic.model.Person;
 import org.springframework.samples.petclinic.vet.Vet;
@@ -32,6 +37,31 @@ public class PetClinicRuntimeHints implements RuntimeHintsRegistrar {
 		hints.serialization().registerType(BaseEntity.class);
 		hints.serialization().registerType(Person.class);
 		hints.serialization().registerType(Vet.class);
+
+		// Register hints for RestTemplate and response classes
+		registerRestTemplateHints(hints);
+	}
+
+	private void registerRestTemplateHints(RuntimeHints hints) {
+		// Register reflection hints for the response classes
+		hints.reflection()
+			.registerType(BreedService.BreedListResponse.class, MemberCategory.INVOKE_DECLARED_CONSTRUCTORS,
+					MemberCategory.INVOKE_DECLARED_METHODS, MemberCategory.DECLARED_FIELDS);
+
+		hints.reflection()
+			.registerType(BreedService.BreedImageResponse.class, MemberCategory.INVOKE_DECLARED_CONSTRUCTORS,
+					MemberCategory.INVOKE_DECLARED_METHODS, MemberCategory.DECLARED_FIELDS);
+
+		// Register type hint for List<String> used in BreedListResponse
+		hints.reflection()
+			.registerType(TypeReference.of(List.class), MemberCategory.INVOKE_DECLARED_CONSTRUCTORS,
+					MemberCategory.INVOKE_DECLARED_METHODS);
+
+		// Register proxy hints for network access
+		hints.proxies().registerJdkProxy(org.springframework.http.client.ClientHttpRequestFactory.class);
+
+		// In Spring Boot 3.5.0, network access is automatically allowed in native images
+		// No explicit registration is needed for domain access
 	}
 
 }

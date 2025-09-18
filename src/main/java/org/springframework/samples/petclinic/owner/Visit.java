@@ -17,12 +17,11 @@ package org.springframework.samples.petclinic.owner;
 
 import java.time.LocalDate;
 
+import org.springframework.data.relational.core.mapping.Column;
+import org.springframework.data.relational.core.mapping.Table;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.samples.petclinic.model.BaseEntity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 
 /**
@@ -31,16 +30,19 @@ import jakarta.validation.constraints.NotBlank;
  * @author Ken Krebs
  * @author Dave Syer
  */
-@Entity
-@Table(name = "visits")
+@Table("visits")
 public class Visit extends BaseEntity {
 
-	@Column(name = "visit_date")
+	@Column("visit_date")
 	@DateTimeFormat(pattern = "yyyy-MM-dd")
 	private LocalDate date;
 
+	@Column("description")
 	@NotBlank
 	private String description;
+
+	@Column("pet_id")
+	private Integer petId;
 
 	/**
 	 * Creates a new instance of Visit for the current date
@@ -63,6 +65,14 @@ public class Visit extends BaseEntity {
 
 	public void setDescription(String description) {
 		this.description = description;
+	}
+
+	public Integer getPetId() {
+		return this.petId;
+	}
+
+	public void setPetId(Integer petId) {
+		this.petId = petId;
 	}
 
 }

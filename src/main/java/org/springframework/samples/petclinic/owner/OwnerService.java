@@ -13,26 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.samples.petclinic.system;
+package org.springframework.samples.petclinic.owner;
 
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
+import jakarta.annotation.Nullable;
+import org.springframework.data.domain.Pageable;
 import reactor.core.publisher.Mono;
+import reactor.util.function.Tuple2;
+
+import java.util.List;
 
 /**
- * Controller used to showcase what happens when an exception is thrown
- *
- * @author Michael Isvy
- * <p/>
- * Also see how a view that resolves to "error" has been added ("error.html").
+ * Service for {@link Owner} domain objects.
  */
-@Controller
-class CrashController {
+public interface OwnerService {
 
-	@GetMapping("/oups")
-	public Mono<String> triggerException() {
-		return Mono.error(new RuntimeException(
-				"Expected: controller used to showcase what " + "happens when an exception is thrown"));
-	}
+	Mono<Tuple2<List<Owner>, Long>> findByLastNameStartingWithReactive(@Nullable String lastName, Pageable pageable);
+
+	Mono<Owner> save(Owner owner);
+
+	Mono<Owner> findByIdReactive(Integer id);
 
 }

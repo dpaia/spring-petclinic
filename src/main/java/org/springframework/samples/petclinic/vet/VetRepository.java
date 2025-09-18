@@ -16,43 +16,37 @@
 package org.springframework.samples.petclinic.vet;
 
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.dao.DataAccessException;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.repository.Repository;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Collection;
+import org.springframework.data.r2dbc.repository.Query;
+import org.springframework.data.r2dbc.repository.R2dbcRepository;
+import reactor.core.publisher.Flux;
 
 /**
  * Repository class for <code>Vet</code> domain objects All method names are compliant
  * with Spring Data naming conventions so this interface can easily be extended for Spring
  * Data. See:
- * https://docs.spring.io/spring-data/jpa/docs/current/reference/html/#repositories.query-methods.query-creation
+ * https://docs.spring.io/spring-data/r2dbc/docs/current/reference/html/#repositories
  *
  * @author Ken Krebs
  * @author Juergen Hoeller
  * @author Sam Brannen
  * @author Michael Isvy
  */
-public interface VetRepository extends Repository<Vet, Integer> {
+public interface VetRepository extends R2dbcRepository<Vet, Integer> {
 
 	/**
 	 * Retrieve all <code>Vet</code>s from the data store.
-	 * @return a <code>Collection</code> of <code>Vet</code>s
+	 * @return a <code>Flux</code> of <code>Vet</code>s
 	 */
-	@Transactional(readOnly = true)
 	@Cacheable("vets")
-	Collection<Vet> findAll() throws DataAccessException;
+	Flux<Vet> findAll();
 
 	/**
-	 * Retrieve all <code>Vet</code>s from data store in Pages
-	 * @param pageable
-	 * @return
-	 * @throws DataAccessException
+	 * Retrieve all <code>Vet</code>s from data store with pagination
+	 * @param pageable pagination information
+	 * @return a <code>Flux</code> of <code>Vet</code>s
 	 */
-	@Transactional(readOnly = true)
 	@Cacheable("vets")
-	Page<Vet> findAll(Pageable pageable) throws DataAccessException;
+	Flux<Vet> findAllBy(Pageable pageable);
 
 }

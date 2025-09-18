@@ -20,18 +20,11 @@ import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import org.springframework.data.annotation.Transient;
+import org.springframework.data.relational.core.mapping.Column;
+import org.springframework.data.relational.core.mapping.Table;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.samples.petclinic.model.NamedEntity;
-
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.OrderBy;
-import jakarta.persistence.Table;
 
 /**
  * Simple business object representing a pet.
@@ -41,21 +34,23 @@ import jakarta.persistence.Table;
  * @author Sam Brannen
  * @author Wick Dynex
  */
-@Entity
-@Table(name = "pets")
+@Table("pets")
 public class Pet extends NamedEntity {
 
-	@Column(name = "birth_date")
+	@Column("birth_date")
 	@DateTimeFormat(pattern = "yyyy-MM-dd")
 	private LocalDate birthDate;
 
-	@ManyToOne
-	@JoinColumn(name = "type_id")
+	@Column("type_id")
+	private Integer typeId;
+
+	@Column("owner_id")
+	private Integer ownerId;
+
+	@Transient
 	private PetType type;
 
-	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-	@JoinColumn(name = "pet_id")
-	@OrderBy("date ASC")
+	@Transient
 	private final Set<Visit> visits = new LinkedHashSet<>();
 
 	public void setBirthDate(LocalDate birthDate) {
@@ -72,6 +67,25 @@ public class Pet extends NamedEntity {
 
 	public void setType(PetType type) {
 		this.type = type;
+		if (type != null) {
+			this.typeId = type.getId();
+		}
+	}
+
+	public Integer getTypeId() {
+		return this.typeId;
+	}
+
+	public void setTypeId(Integer typeId) {
+		this.typeId = typeId;
+	}
+
+	public Integer getOwnerId() {
+		return this.ownerId;
+	}
+
+	public void setOwnerId(Integer ownerId) {
+		this.ownerId = ownerId;
 	}
 
 	public Collection<Visit> getVisits() {
@@ -79,6 +93,9 @@ public class Pet extends NamedEntity {
 	}
 
 	public void addVisit(Visit visit) {
+		// Set the petId on the visit
+		visit.setPetId(this.getId());
+		// Still add to transient collection for backward compatibility
 		getVisits().add(visit);
 	}
 

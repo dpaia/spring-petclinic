@@ -17,7 +17,6 @@ package org.springframework.samples.petclinic.vet;
 
 import java.util.List;
 
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
@@ -25,6 +24,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import reactor.core.publisher.Mono;
+import reactor.util.function.Tuple2;
 
 /**
  * @author Juergen Hoeller
@@ -35,44 +36,40 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @Controller
 class VetController {
 
-	private final VetRepository vetRepository;
+	private static final int PAGE_SIZE = 5;
 
-	public VetController(VetRepository vetRepository) {
-		this.vetRepository = vetRepository;
+	private final VetService vetService;
+
+	public VetController(VetService vetService) {
+		this.vetService = vetService;
 	}
 
 	@GetMapping("/vets.html")
-	public String showVetList(@RequestParam(defaultValue = "1") int page, Model model) {
+	public Mono<String> showVetList(@RequestParam(defaultValue = "1") int page, Model model) {
 		// Here we are returning an object of type 'Vets' rather than a collection of Vet
 		// objects so it is simpler for Object-Xml mapping
-		Vets vets = new Vets();
-		Page<Vet> paginated = findPaginated(page);
-		vets.getVetList().addAll(paginated.toList());
-		return addPaginationModel(page, paginated, model);
+		return findPaginatedReactive(page).map(tuple -> addPaginationModel(page, tuple.getT2(), tuple.getT1(), model));
 	}
 
-	private String addPaginationModel(int page, Page<Vet> paginated, Model model) {
-		List<Vet> listVets = paginated.getContent();
+	private String addPaginationModel(int page, Long totalItems, List<Vet> paginated, Model model) {
+		model.addAttribute("totalPages", (int) Math.ceil((double) totalItems / PAGE_SIZE));
 		model.addAttribute("currentPage", page);
-		model.addAttribute("totalPages", paginated.getTotalPages());
-		model.addAttribute("totalItems", paginated.getTotalElements());
-		model.addAttribute("listVets", listVets);
+		model.addAttribute("totalItems", totalItems);
+		model.addAttribute("listVets", paginated);
 		return "vets/vetList";
 	}
 
-	private Page<Vet> findPaginated(int page) {
-		int pageSize = 5;
-		Pageable pageable = PageRequest.of(page - 1, pageSize);
-		return vetRepository.findAll(pageable);
+	private Mono<Tuple2<List<Vet>, Long>> findPaginatedReactive(int page) {
+		Pageable pageable = PageRequest.of(page - 1, PAGE_SIZE);
+		return vetService.findAllPaginatedReactive(pageable);
 	}
 
 	@GetMapping({ "/vets" })
-	public @ResponseBody Vets showResourcesVetList() {
+	@ResponseBody
+	public Mono<Vets> showResourcesVetList() {
 		// Here we are returning an object of type 'Vets' rather than a collection of Vet
 		// objects so it is simpler for JSon/Object mapping
-		Vets vets = new Vets();
-		vets.getVetList().addAll(this.vetRepository.findAll());
-		return vets;
+		return vetService.getVetsAsListReactive();
 	}
 
 }

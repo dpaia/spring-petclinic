@@ -13,25 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.samples.petclinic.owner;
 
-import org.springframework.data.r2dbc.repository.Query;
 import org.springframework.data.r2dbc.repository.R2dbcRepository;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 /**
- * Repository class for <code>PetType</code> domain objects.
- *
- * @author Patrick Baumgartner
+ * Repository class for <code>Pet</code> domain objects. All method names are compliant
+ * with Spring Data naming conventions so this interface can easily be extended for Spring
+ * Data. See:
+ * https://docs.spring.io/spring-data/r2dbc/docs/current/reference/html/#repositories
  */
-
-public interface PetTypeRepository extends R2dbcRepository<PetType, Integer> {
+public interface PetRepository extends R2dbcRepository<Pet, Integer> {
 
 	/**
-	 * Retrieve all {@link PetType}s from the data store ordered by name.
-	 * @return a Flux of {@link PetType}s.
+	 * Find all pets for an owner.
+	 * @param ownerId the owner id
+	 * @return a Flux of Pet objects
 	 */
-	Flux<PetType> findAllByOrderByName();
+	Flux<Pet> findByOwnerId(Integer ownerId);
+
+	Mono<Pet> findByIdAndOwnerId(Integer id, Integer ownerId);
 
 }

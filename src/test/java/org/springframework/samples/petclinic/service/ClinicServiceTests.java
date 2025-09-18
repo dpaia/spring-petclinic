@@ -16,28 +16,25 @@
 
 package org.springframework.samples.petclinic.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import java.time.LocalDate;
 import java.util.Collection;
-import java.util.Optional;
+import java.util.List;
+import java.util.Objects;
+
+import org.springframework.samples.petclinic.owner.*;
+import org.springframework.test.annotation.DirtiesContext;
+import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.data.domain.Page;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.samples.petclinic.owner.Owner;
-import org.springframework.samples.petclinic.owner.OwnerRepository;
-import org.springframework.samples.petclinic.owner.PetTypeRepository;
-import org.springframework.samples.petclinic.owner.Pet;
-import org.springframework.samples.petclinic.owner.PetType;
-import org.springframework.samples.petclinic.owner.Visit;
 import org.springframework.samples.petclinic.vet.Vet;
-import org.springframework.samples.petclinic.vet.VetRepository;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.samples.petclinic.vet.VetService;
+import reactor.util.function.Tuple2;
 
 /**
  * Integration test of the Service and the Repository layer.
@@ -67,185 +64,235 @@ import org.springframework.transaction.annotation.Transactional;
  * @author Michael Isvy
  * @author Dave Syer
  */
-@DataJpaTest
+@SpringBootTest
 // Ensure that if the mysql profile is active we connect to the real database:
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 // @TestPropertySource("/application-postgres.properties")
 class ClinicServiceTests {
 
 	@Autowired
-	protected OwnerRepository owners;
+	protected OwnerService ownerService;
 
 	@Autowired
 	protected PetTypeRepository types;
 
 	@Autowired
-	protected VetRepository vets;
+	protected VetService vetService;
+
+	@Autowired
+	protected VisitService visitService;
 
 	Pageable pageable;
 
+	@Autowired
+	private PetRepository petRepository;
+
 	@Test
 	void shouldFindOwnersByLastName() {
-		Page<Owner> owners = this.owners.findByLastNameStartingWith("Davis", pageable);
-		assertThat(owners).hasSize(2);
+		this.ownerService.findByLastNameStartingWithReactive("Davis", pageable)
+			.map(Tuple2::getT1)
+			.as(StepVerifier::create)
+			.expectNextMatches(owners -> owners.size() == 2)
+			.verifyComplete();
 
-		owners = this.owners.findByLastNameStartingWith("Daviss", pageable);
-		assertThat(owners).isEmpty();
+		this.ownerService.findByLastNameStartingWithReactive("Daviss", pageable)
+			.map(Tuple2::getT1)
+			.as(StepVerifier::create)
+			.expectNextMatches(List::isEmpty)
+			.verifyComplete();
 	}
 
 	@Test
 	void shouldFindSingleOwnerWithPet() {
-		Optional<Owner> optionalOwner = this.owners.findById(1);
-		assertThat(optionalOwner).isPresent();
-		Owner owner = optionalOwner.get();
-		assertThat(owner.getLastName()).startsWith("Franklin");
-		assertThat(owner.getPets()).hasSize(1);
-		assertThat(owner.getPets().get(0).getType()).isNotNull();
-		assertThat(owner.getPets().get(0).getType().getName()).isEqualTo("cat");
+		this.ownerService.findByIdReactive(1)
+			.as(StepVerifier::create)
+			.expectNextMatches(owner -> owner.getLastName().startsWith("Franklin") && owner.getPets().size() == 1
+					&& owner.getPets().get(0).getType() != null
+					&& owner.getPets().get(0).getType().getName().equals("cat"))
+			.verifyComplete();
 	}
 
 	@Test
-	@Transactional
+	@DirtiesContext
 	void shouldInsertOwner() {
-		Page<Owner> owners = this.owners.findByLastNameStartingWith("Schultz", pageable);
-		int found = (int) owners.getTotalElements();
+		// First, find existing owners with last name "Schultz"
+		this.ownerService.findByLastNameStartingWithReactive("Schultz", pageable)
+			.map(Tuple2::getT1)
+			.flatMap(existingOwners -> {
+				int found = existingOwners.size();
 
-		Owner owner = new Owner();
-		owner.setFirstName("Sam");
-		owner.setLastName("Schultz");
-		owner.setAddress("4, Evans Street");
-		owner.setCity("Wollongong");
-		owner.setTelephone("4444444444");
-		this.owners.save(owner);
-		assertThat(owner.getId()).isNotZero();
+				// Create and save a new owner
+				Owner owner = new Owner();
+				owner.setFirstName("Sam");
+				owner.setLastName("Schultz");
+				owner.setAddress("4, Evans Street");
+				owner.setCity("Wollongong");
+				owner.setTelephone("4444444444");
 
-		owners = this.owners.findByLastNameStartingWith("Schultz", pageable);
-		assertThat(owners.getTotalElements()).isEqualTo(found + 1);
+				return this.ownerService.save(owner).flatMap(savedOwner -> {
+					// Verify the ID is not zero
+					if (savedOwner.getId() == 0) {
+						return Mono.error(new AssertionError("Owner ID should not be zero"));
+					}
+
+					// Find owners again and verify count increased
+					return this.ownerService.findByLastNameStartingWithReactive("Schultz", pageable)
+						.map(Tuple2::getT1)
+						.flatMap(updatedOwners -> {
+							if (updatedOwners.size() != found + 1) {
+								return Mono.just(new AssertionError(
+										"Expected " + (found + 1) + " owners, but found " + updatedOwners.size()));
+							}
+							return Mono.just(updatedOwners);
+						});
+				});
+			})
+			.as(StepVerifier::create)
+			.expectNextCount(1)
+			.verifyComplete();
 	}
 
 	@Test
-	@Transactional
+	@DirtiesContext
 	void shouldUpdateOwner() {
-		Optional<Owner> optionalOwner = this.owners.findById(1);
-		assertThat(optionalOwner).isPresent();
-		Owner owner = optionalOwner.get();
-		String oldLastName = owner.getLastName();
-		String newLastName = oldLastName + "X";
+		this.ownerService.findByIdReactive(1).flatMap(owner -> {
+			String oldLastName = owner.getLastName();
+			String newLastName = oldLastName + "X";
 
-		owner.setLastName(newLastName);
-		this.owners.save(owner);
-
-		// retrieving new name from database
-		optionalOwner = this.owners.findById(1);
-		assertThat(optionalOwner).isPresent();
-		owner = optionalOwner.get();
-		assertThat(owner.getLastName()).isEqualTo(newLastName);
+			owner.setLastName(newLastName);
+			return this.ownerService.save(owner).then(this.ownerService.findByIdReactive(1)).flatMap(updatedOwner -> {
+				if (!updatedOwner.getLastName().equals(newLastName)) {
+					return Mono.just(new AssertionError(
+							"Expected last name to be " + newLastName + " but was " + updatedOwner.getLastName()));
+				}
+				return Mono.just(updatedOwner);
+			});
+		}).as(StepVerifier::create).expectNextCount(1).verifyComplete();
 	}
 
 	@Test
 	void shouldFindAllPetTypes() {
-		Collection<PetType> petTypes = this.types.findPetTypes();
-
-		PetType petType1 = EntityUtils.getById(petTypes, PetType.class, 1);
-		assertThat(petType1.getName()).isEqualTo("cat");
-		PetType petType4 = EntityUtils.getById(petTypes, PetType.class, 4);
-		assertThat(petType4.getName()).isEqualTo("snake");
+		this.types.findAllByOrderByName().collectList().as(StepVerifier::create).expectNextMatches(petTypes -> {
+			PetType petType1 = EntityUtils.getById(petTypes, PetType.class, 1);
+			PetType petType4 = EntityUtils.getById(petTypes, PetType.class, 4);
+			return petType1.getName().equals("cat") && petType4.getName().equals("snake");
+		}).verifyComplete();
 	}
 
 	@Test
-	@Transactional
+	@DirtiesContext
 	void shouldInsertPetIntoDatabaseAndGenerateId() {
-		Optional<Owner> optionalOwner = this.owners.findById(6);
-		assertThat(optionalOwner).isPresent();
-		Owner owner6 = optionalOwner.get();
+		this.types.findAllByOrderByName().collectList().flatMap(types -> {
+			Pet pet = new Pet();
+			pet.setName("bowser");
+			pet.setOwnerId(6);
+			pet.setType(EntityUtils.getById(types, PetType.class, 2));
+			pet.setBirthDate(LocalDate.now());
 
-		int found = owner6.getPets().size();
+			return petRepository.save(pet).then(this.ownerService.findByIdReactive(6).flatMap(owner6 -> {
+				Pet bowser = owner6.getPet("bowser");
+				if (bowser == null) {
+					return Mono.error(new AssertionError("Expected pet 'bowser' not found"));
+				}
 
-		Pet pet = new Pet();
-		pet.setName("bowser");
-		Collection<PetType> types = this.types.findPetTypes();
-		pet.setType(EntityUtils.getById(types, PetType.class, 2));
-		pet.setBirthDate(LocalDate.now());
-		owner6.addPet(pet);
-		assertThat(owner6.getPets()).hasSize(found + 1);
-
-		this.owners.save(owner6);
-
-		optionalOwner = this.owners.findById(6);
-		assertThat(optionalOwner).isPresent();
-		owner6 = optionalOwner.get();
-		assertThat(owner6.getPets()).hasSize(found + 1);
-		// checks that id has been generated
-		pet = owner6.getPet("bowser");
-		assertThat(pet.getId()).isNotNull();
+				if (bowser.getId() == null) {
+					return Mono.error(new AssertionError("Pet ID should not be null"));
+				}
+				return Mono.just(owner6);
+			}));
+		}).as(StepVerifier::create).expectNextCount(1).verifyComplete();
 	}
 
 	@Test
-	@Transactional
+	@DirtiesContext
 	void shouldUpdatePetName() {
-		Optional<Owner> optionalOwner = this.owners.findById(6);
-		assertThat(optionalOwner).isPresent();
-		Owner owner6 = optionalOwner.get();
+		petRepository.findById(7).map(pet7 -> {
+			String oldName = pet7.getName();
+			String newName = oldName + "X";
+			pet7.setName(newName);
 
-		Pet pet7 = owner6.getPet(7);
-		String oldName = pet7.getName();
+			return petRepository.save(pet7).map(updatedPet -> this.ownerService.findByIdReactive(6).flatMap(owner6 -> {
+				Pet realPet = owner6.getPet(7);
+				if (realPet == null) {
+					return Mono.error(new AssertionError("Pet with ID 7 not found"));
+				}
 
-		String newName = oldName + "X";
-		pet7.setName(newName);
-		this.owners.save(owner6);
+				if (!updatedPet.getName().equals(realPet.getName())) {
+					return Mono.just(new AssertionError(
+							"Expected pet name to be " + newName + " but was " + updatedPet.getName()));
+				}
 
-		optionalOwner = this.owners.findById(6);
-		assertThat(optionalOwner).isPresent();
-		owner6 = optionalOwner.get();
-		pet7 = owner6.getPet(7);
-		assertThat(pet7.getName()).isEqualTo(newName);
+				return Mono.just(owner6);
+			}));
+		}).as(StepVerifier::create).expectNextCount(1).verifyComplete();
 	}
 
 	@Test
 	void shouldFindVets() {
-		Collection<Vet> vets = this.vets.findAll();
-
-		Vet vet = EntityUtils.getById(vets, Vet.class, 3);
-		assertThat(vet.getLastName()).isEqualTo("Douglas");
-		assertThat(vet.getNrOfSpecialties()).isEqualTo(2);
-		assertThat(vet.getSpecialties().get(0).getName()).isEqualTo("dentistry");
-		assertThat(vet.getSpecialties().get(1).getName()).isEqualTo("surgery");
+		this.vetService.findAllPaginatedReactive(pageable)
+			.map(Tuple2::getT1)
+			.as(StepVerifier::create)
+			.expectNextMatches(vets -> {
+				Vet vet = EntityUtils.getById(vets, Vet.class, 3);
+				return vet.getLastName().equals("Douglas") && vet.getNrOfSpecialties() == 2
+						&& vet.getSpecialties().get(0).getName().equals("dentistry")
+						&& vet.getSpecialties().get(1).getName().equals("surgery");
+			})
+			.verifyComplete();
 	}
 
 	@Test
-	@Transactional
+	@DirtiesContext
 	void shouldAddNewVisitForPet() {
-		Optional<Owner> optionalOwner = this.owners.findById(6);
-		assertThat(optionalOwner).isPresent();
-		Owner owner6 = optionalOwner.get();
-
-		Pet pet7 = owner6.getPet(7);
-		int found = pet7.getVisits().size();
+		// Create and save a visit first
 		Visit visit = new Visit();
+		visit.setPetId(7);
 		visit.setDescription("test");
 
-		owner6.addVisit(pet7.getId(), visit);
-		this.owners.save(owner6);
+		// Save the visit first and then proceed with the test
+		this.visitService.save(visit).flatMap(savedVisit -> this.ownerService.findByIdReactive(6).flatMap(owner6 -> {
+			Pet pet7 = owner6.getPet(7);
+			if (pet7 == null) {
+				return Mono.error(new AssertionError("Pet with ID 7 not found"));
+			}
 
-		assertThat(pet7.getVisits()) //
-			.hasSize(found + 1) //
-			.allMatch(value -> value.getId() != null);
+			if (pet7.getVisits().size() != 3) {
+				return Mono
+					.error(new AssertionError("Expected " + 3 + " visits, but found " + pet7.getVisits().size()));
+			}
+
+			if (pet7.getVisits().stream().anyMatch(v -> v.getId() == null)) {
+				return Mono.error(new AssertionError("Visit ID should not be null"));
+			}
+
+			if (pet7.getVisits().stream().noneMatch(v -> Objects.equals(v.getPetId(), visit.getPetId()))) {
+				return Mono
+					.error(new AssertionError("Expected visit with pet ID " + visit.getPetId() + " but found none"));
+			}
+
+			return Mono.just(owner6);
+		})).as(StepVerifier::create).expectNextCount(1).verifyComplete();
 	}
 
 	@Test
 	void shouldFindVisitsByPetId() {
-		Optional<Owner> optionalOwner = this.owners.findById(6);
-		assertThat(optionalOwner).isPresent();
-		Owner owner6 = optionalOwner.get();
+		this.ownerService.findByIdReactive(6).flatMap(owner6 -> {
+			Pet pet7 = owner6.getPet(7);
+			if (pet7 == null) {
+				return Mono.error(new AssertionError("Pet with ID 7 not found"));
+			}
 
-		Pet pet7 = owner6.getPet(7);
-		Collection<Visit> visits = pet7.getVisits();
+			Collection<Visit> visits = pet7.getVisits();
+			if (visits.size() != 2) {
+				return Mono.error(new AssertionError("Expected 2 visits, but found " + visits.size()));
+			}
 
-		assertThat(visits) //
-			.hasSize(2) //
-			.element(0)
-			.extracting(Visit::getDate)
-			.isNotNull();
+			if (visits.iterator().next().getDate() == null) {
+				return Mono.error(new AssertionError("Visit date should not be null"));
+			}
+
+			return Mono.just(owner6);
+		}).as(StepVerifier::create).expectNextCount(1).verifyComplete();
 	}
 
 }

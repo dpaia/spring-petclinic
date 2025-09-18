@@ -13,26 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.samples.petclinic.system;
+package org.springframework.samples.petclinic.owner;
 
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 /**
- * Controller used to showcase what happens when an exception is thrown
- *
- * @author Michael Isvy
- * <p/>
- * Also see how a view that resolves to "error" has been added ("error.html").
+ * Service for {@link Pet} domain objects.
  */
-@Controller
-class CrashController {
+public interface PetService {
 
-	@GetMapping("/oups")
-	public Mono<String> triggerException() {
-		return Mono.error(new RuntimeException(
-				"Expected: controller used to showcase what " + "happens when an exception is thrown"));
-	}
+	Flux<Pet> findByOwnerId(Integer ownerId);
+
+	Mono<Pet> findByIdAndOwnerId(Integer id, Integer ownerId);
+
+	Mono<Pet> save(Owner owner, Pet pet);
 
 }

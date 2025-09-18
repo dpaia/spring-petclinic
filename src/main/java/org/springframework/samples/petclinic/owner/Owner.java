@@ -19,17 +19,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.core.style.ToStringCreator;
+import org.springframework.data.annotation.Transient;
+import org.springframework.data.relational.core.mapping.Column;
+import org.springframework.data.relational.core.mapping.Table;
 import org.springframework.samples.petclinic.model.Person;
 import org.springframework.util.Assert;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.OrderBy;
-import jakarta.persistence.Table;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.NotBlank;
 
@@ -43,26 +38,23 @@ import jakarta.validation.constraints.NotBlank;
  * @author Oliver Drotbohm
  * @author Wick Dynex
  */
-@Entity
-@Table(name = "owners")
+@Table("owners")
 public class Owner extends Person {
 
-	@Column(name = "address")
+	@Column("address")
 	@NotBlank
 	private String address;
 
-	@Column(name = "city")
+	@Column("city")
 	@NotBlank
 	private String city;
 
-	@Column(name = "telephone")
+	@Column("telephone")
 	@NotBlank
 	@Pattern(regexp = "\\d{10}", message = "{telephone.invalid}")
 	private String telephone;
 
-	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-	@JoinColumn(name = "owner_id")
-	@OrderBy("name")
+	@Transient
 	private final List<Pet> pets = new ArrayList<>();
 
 	public String getAddress() {
@@ -94,9 +86,7 @@ public class Owner extends Person {
 	}
 
 	public void addPet(Pet pet) {
-		if (pet.isNew()) {
-			getPets().add(pet);
-		}
+		getPets().add(pet);
 	}
 
 	/**
@@ -156,20 +146,20 @@ public class Owner extends Person {
 	}
 
 	/**
-	 * Adds the given {@link Visit} to the {@link Pet} with the given identifier.
+	 * Sets the petId on the given {@link Visit}.
 	 * @param petId the identifier of the {@link Pet}, must not be {@literal null}.
 	 * @param visit the visit to add, must not be {@literal null}.
 	 */
 	public void addVisit(Integer petId, Visit visit) {
-
-		Assert.notNull(petId, "Pet identifier must not be null!");
-		Assert.notNull(visit, "Visit must not be null!");
-
+		// Validate that the pet exists
 		Pet pet = getPet(petId);
-
 		Assert.notNull(pet, "Invalid Pet identifier!");
 
-		pet.addVisit(visit);
+		// Set the petId on the visit directly
+		visit.setPetId(petId);
+
+		// For backward compatibility, still add to the pet's visits collection
+		pet.getVisits().add(visit);
 	}
 
 }

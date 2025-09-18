@@ -13,26 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.samples.petclinic.system;
+package org.springframework.samples.petclinic.vet;
 
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import reactor.core.publisher.Mono;
+import org.springframework.data.r2dbc.repository.R2dbcRepository;
+import reactor.core.publisher.Flux;
 
 /**
- * Controller used to showcase what happens when an exception is thrown
- *
- * @author Michael Isvy
- * <p/>
- * Also see how a view that resolves to "error" has been added ("error.html").
+ * Repository interface for {@link VetSpecialty} entities. Handles the many-to-many
+ * relationship between Vet and Specialty.
  */
-@Controller
-class CrashController {
+public interface VetSpecialtyRepository extends R2dbcRepository<VetSpecialty, Integer> {
 
-	@GetMapping("/oups")
-	public Mono<String> triggerException() {
-		return Mono.error(new RuntimeException(
-				"Expected: controller used to showcase what " + "happens when an exception is thrown"));
-	}
+	Flux<VetSpecialty> findAllByVetId(Integer vetId);
 
 }

@@ -32,7 +32,7 @@ public class I18nPropertiesSyncTest {
 
 	private static final Pattern HTML_TEXT_LITERAL = Pattern.compile(">([^<>{}]+)<");
 
-	private static final Pattern BRACKET_ONLY = Pattern.compile("<[^>]*>\\s*[\\[\\]](?:&nbsp;)?\\s*</[^>]*>");
+	private static final Pattern BRACKET_ONLY = Pattern.compile("<[^>]*>\\s*[\\[\\]](?:&#160;)?\\s*</[^>]*>");
 
 	private static final Pattern HAS_TH_TEXT_ATTRIBUTE = Pattern.compile("th:(u)?text\\s*=\\s*\"[^\"]+\"");
 

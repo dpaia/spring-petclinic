@@ -15,24 +15,19 @@
  */
 package org.springframework.samples.petclinic.system;
 
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
 import reactor.core.publisher.Mono;
 
-/**
- * Controller used to showcase what happens when an exception is thrown
- *
- * @author Michael Isvy
- * <p/>
- * Also see how a view that resolves to "error" has been added ("error.html").
- */
-@Controller
-class CrashController {
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 
-	@GetMapping("/oups")
-	public Mono<String> triggerException() {
-		return Mono.error(new RuntimeException(
-				"Expected: controller used to showcase what " + "happens when an exception is thrown"));
+@ControllerAdvice
+public class GlobalErrorHandler {
+
+	@ExceptionHandler(RuntimeException.class)
+	public Mono<String> handleRuntimeException(RuntimeException ex, Model model) {
+		model.addAttribute("message", ex.getMessage());
+		return Mono.just("error");
 	}
 
 }

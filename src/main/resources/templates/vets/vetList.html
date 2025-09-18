@@ -30,7 +30,7 @@
       <a th:if="${currentPage != i}" th:href="@{'/vets.html?page=__${i}__'}">[[${i}]]</a>
       <span th:unless="${currentPage != i}">[[${i}]]</span>
     </span>
-    <span>]&nbsp;</span>
+    <span>]&#160;</span>
     <span>
       <a th:if="${currentPage > 1}" th:href="@{'/vets.html?page=1'}" th:title="#{first}"
         class="fa fa-fast-backward"></a>

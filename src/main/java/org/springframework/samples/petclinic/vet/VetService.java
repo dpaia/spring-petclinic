@@ -13,26 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.samples.petclinic.system;
+package org.springframework.samples.petclinic.vet;
 
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.data.domain.Pageable;
 import reactor.core.publisher.Mono;
+import reactor.util.function.Tuple2;
+
+import java.util.List;
 
 /**
- * Controller used to showcase what happens when an exception is thrown
- *
- * @author Michael Isvy
- * <p/>
- * Also see how a view that resolves to "error" has been added ("error.html").
+ * Service for {@link Vet} domain objects.
  */
-@Controller
-class CrashController {
+public interface VetService {
 
-	@GetMapping("/oups")
-	public Mono<String> triggerException() {
-		return Mono.error(new RuntimeException(
-				"Expected: controller used to showcase what " + "happens when an exception is thrown"));
-	}
+	Mono<Vets> getVetsAsListReactive();
+
+	Mono<Tuple2<List<Vet>, Long>> findAllPaginatedReactive(Pageable pageable);
 
 }

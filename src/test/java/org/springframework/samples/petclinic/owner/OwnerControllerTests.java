@@ -16,38 +16,18 @@
 
 package org.springframework.samples.petclinic.owner;
 
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledInNativeImage;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.http.MediaType;
+import org.springframework.samples.petclinic.system.TestEnglishLocaleConfig;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.aot.DisabledInAotMode;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
-
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.hasProperty;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.web.reactive.function.BodyInserters;
 
 /**
  * Test class for {@link OwnerController}
@@ -55,7 +35,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Colin But
  * @author Wick Dynex
  */
-@WebMvcTest(OwnerController.class)
+@Import(TestEnglishLocaleConfig.class)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DisabledInNativeImage
 @DisabledInAotMode
 class OwnerControllerTests {
@@ -63,189 +44,226 @@ class OwnerControllerTests {
 	private static final int TEST_OWNER_ID = 1;
 
 	@Autowired
-	private MockMvc mockMvc;
+	private WebTestClient webTestClient;
 
-	@MockitoBean
-	private OwnerRepository owners;
-
-	private Owner george() {
-		Owner george = new Owner();
-		george.setId(TEST_OWNER_ID);
-		george.setFirstName("George");
-		george.setLastName("Franklin");
-		george.setAddress("110 W. Liberty St.");
-		george.setCity("Madison");
-		george.setTelephone("6085551023");
-		Pet max = new Pet();
-		PetType dog = new PetType();
-		dog.setName("dog");
-		max.setType(dog);
-		max.setName("Max");
-		max.setBirthDate(LocalDate.now());
-		george.addPet(max);
-		max.setId(1);
-		return george;
-	}
-
-	@BeforeEach
-	void setup() {
-
-		Owner george = george();
-		given(this.owners.findByLastNameStartingWith(eq("Franklin"), any(Pageable.class)))
-			.willReturn(new PageImpl<>(List.of(george)));
-
-		given(this.owners.findById(TEST_OWNER_ID)).willReturn(Optional.of(george));
-		Visit visit = new Visit();
-		visit.setDate(LocalDate.now());
-		george.getPet("Max").getVisits().add(visit);
-
+	@Test
+	void testInitCreationForm() {
+		webTestClient.get()
+			.uri("/owners/new")
+			.exchange()
+			.expectStatus()
+			.isOk()
+			.expectBody()
+			.xpath("//input[@name='firstName']")
+			.exists();
 	}
 
 	@Test
-	void testInitCreationForm() throws Exception {
-		mockMvc.perform(get("/owners/new"))
-			.andExpect(status().isOk())
-			.andExpect(model().attributeExists("owner"))
-			.andExpect(view().name("owners/createOrUpdateOwnerForm"));
+	@DirtiesContext
+	void testProcessCreationFormSuccess() {
+		webTestClient.post()
+			.uri("/owners/new")
+			.contentType(MediaType.APPLICATION_FORM_URLENCODED)
+			.bodyValue("firstName=Joe&lastName=Bloggs&address=123 Caramel Street&city=London&telephone=1316761638")
+			.exchange()
+			.expectStatus()
+			.is3xxRedirection();
 	}
 
 	@Test
-	void testProcessCreationFormSuccess() throws Exception {
-		mockMvc
-			.perform(post("/owners/new").param("firstName", "Joe")
-				.param("lastName", "Bloggs")
-				.param("address", "123 Caramel Street")
-				.param("city", "London")
-				.param("telephone", "1316761638"))
-			.andExpect(status().is3xxRedirection());
+	void testProcessCreationFormHasErrors() {
+		webTestClient.post()
+			.uri("/owners/new")
+			.contentType(MediaType.APPLICATION_FORM_URLENCODED)
+			.bodyValue("firstName=Joe&lastName=Bloggs&city=London")
+			.exchange()
+			.expectStatus()
+			.isOk()
+			.expectBody()
+			.xpath("//span[@class='help-inline'][contains(text(), 'must not be blank')]")
+			.exists();
 	}
 
 	@Test
-	void testProcessCreationFormHasErrors() throws Exception {
-		mockMvc
-			.perform(post("/owners/new").param("firstName", "Joe").param("lastName", "Bloggs").param("city", "London"))
-			.andExpect(status().isOk())
-			.andExpect(model().attributeHasErrors("owner"))
-			.andExpect(model().attributeHasFieldErrors("owner", "address"))
-			.andExpect(model().attributeHasFieldErrors("owner", "telephone"))
-			.andExpect(view().name("owners/createOrUpdateOwnerForm"));
+	void testInitFindForm() {
+		webTestClient.get()
+			.uri("/owners/find")
+			.exchange()
+			.expectStatus()
+			.isOk()
+			.expectBody()
+			.xpath("//form[@id='search-owner-form']")
+			.exists();
 	}
 
 	@Test
-	void testInitFindForm() throws Exception {
-		mockMvc.perform(get("/owners/find"))
-			.andExpect(status().isOk())
-			.andExpect(model().attributeExists("owner"))
-			.andExpect(view().name("owners/findOwners"));
+	void testProcessFindFormSuccess() {
+		webTestClient.get()
+			.uri("/owners?page=1")
+			.exchange()
+			.expectStatus()
+			.isOk()
+			.expectBody()
+			.xpath("//h2[contains(text(), 'Owners')]")
+			.exists()
+			.xpath("//table[@id='owners']//tr[td[a[contains(text(), 'George Franklin')]]]")
+			.exists();
 	}
 
 	@Test
-	void testProcessFindFormSuccess() throws Exception {
-		Page<Owner> tasks = new PageImpl<>(List.of(george(), new Owner()));
-		when(this.owners.findByLastNameStartingWith(anyString(), any(Pageable.class))).thenReturn(tasks);
-		mockMvc.perform(get("/owners?page=1")).andExpect(status().isOk()).andExpect(view().name("owners/ownersList"));
+	void testProcessFindFormByLastName() {
+		webTestClient.get()
+			.uri("/owners?page=1&lastName=Franklin")
+			.exchange()
+			.expectStatus()
+			.is3xxRedirection()
+			.expectHeader()
+			.valueEquals("Location", "/owners/" + TEST_OWNER_ID);
 	}
 
 	@Test
-	void testProcessFindFormByLastName() throws Exception {
-		Page<Owner> tasks = new PageImpl<>(List.of(george()));
-		when(this.owners.findByLastNameStartingWith(eq("Franklin"), any(Pageable.class))).thenReturn(tasks);
-		mockMvc.perform(get("/owners?page=1").param("lastName", "Franklin"))
-			.andExpect(status().is3xxRedirection())
-			.andExpect(view().name("redirect:/owners/" + TEST_OWNER_ID));
+	void testProcessFindFormNoOwnersFound() {
+		webTestClient.get()
+			.uri("/owners?page=1&lastName=Unknown Surname")
+			.exchange()
+			.expectStatus()
+			.isOk()
+			.expectBody()
+			.xpath("//span[@class='help-inline']//p[contains(text(), 'has not been found')]")
+			.exists();
 	}
 
 	@Test
-	void testProcessFindFormNoOwnersFound() throws Exception {
-		Page<Owner> tasks = new PageImpl<>(List.of());
-		when(this.owners.findByLastNameStartingWith(eq("Unknown Surname"), any(Pageable.class))).thenReturn(tasks);
-		mockMvc.perform(get("/owners?page=1").param("lastName", "Unknown Surname"))
-			.andExpect(status().isOk())
-			.andExpect(model().attributeHasFieldErrors("owner", "lastName"))
-			.andExpect(model().attributeHasFieldErrorCode("owner", "lastName", "notFound"))
-			.andExpect(view().name("owners/findOwners"));
-
+	void testInitUpdateOwnerForm() {
+		webTestClient.get()
+			.uri("/owners/{ownerId}/edit", TEST_OWNER_ID)
+			.exchange()
+			.expectStatus()
+			.isOk()
+			.expectBody()
+			.xpath("//input[@name='firstName'][@value='George']")
+			.exists()
+			.xpath("//input[@name='lastName'][@value='Franklin']")
+			.exists()
+			.xpath("//input[@name='address'][@value='110 W. Liberty St.']")
+			.exists()
+			.xpath("//input[@name='city'][@value='Madison']")
+			.exists()
+			.xpath("//input[@name='telephone'][@value='6085551023']")
+			.exists();
 	}
 
 	@Test
-	void testInitUpdateOwnerForm() throws Exception {
-		mockMvc.perform(get("/owners/{ownerId}/edit", TEST_OWNER_ID))
-			.andExpect(status().isOk())
-			.andExpect(model().attributeExists("owner"))
-			.andExpect(model().attribute("owner", hasProperty("lastName", is("Franklin"))))
-			.andExpect(model().attribute("owner", hasProperty("firstName", is("George"))))
-			.andExpect(model().attribute("owner", hasProperty("address", is("110 W. Liberty St."))))
-			.andExpect(model().attribute("owner", hasProperty("city", is("Madison"))))
-			.andExpect(model().attribute("owner", hasProperty("telephone", is("6085551023"))))
-			.andExpect(view().name("owners/createOrUpdateOwnerForm"));
+	@DirtiesContext
+	void testProcessUpdateOwnerFormSuccess() {
+		webTestClient.post()
+			.uri("/owners/{ownerId}/edit", 2)
+			.contentType(MediaType.APPLICATION_FORM_URLENCODED)
+			.bodyValue("firstName=Joe&lastName=Bloggs&address=123 Caramel Street&city=London&telephone=1616291589")
+			.exchange()
+			.expectStatus()
+			.is3xxRedirection()
+			.expectHeader()
+			.valueEquals("Location", "/owners/" + 2);
 	}
 
 	@Test
-	void testProcessUpdateOwnerFormSuccess() throws Exception {
-		mockMvc
-			.perform(post("/owners/{ownerId}/edit", TEST_OWNER_ID).param("firstName", "Joe")
-				.param("lastName", "Bloggs")
-				.param("address", "123 Caramel Street")
-				.param("city", "London")
-				.param("telephone", "1616291589"))
-			.andExpect(status().is3xxRedirection())
-			.andExpect(view().name("redirect:/owners/{ownerId}"));
+	void testProcessUpdateOwnerFormUnchangedSuccess() {
+		webTestClient.post()
+			.uri("/owners/{ownerId}/edit", TEST_OWNER_ID)
+			.contentType(MediaType.APPLICATION_FORM_URLENCODED)
+			.bodyValue(
+					"firstName=George&lastName=Franklin&address=110 W. Liberty St.&city=Madison&telephone=6085551023")
+			.exchange()
+			.expectStatus()
+			.is3xxRedirection()
+			.expectHeader()
+			.valueEquals("Location", "/owners/" + TEST_OWNER_ID);
 	}
 
 	@Test
-	void testProcessUpdateOwnerFormUnchangedSuccess() throws Exception {
-		mockMvc.perform(post("/owners/{ownerId}/edit", TEST_OWNER_ID))
-			.andExpect(status().is3xxRedirection())
-			.andExpect(view().name("redirect:/owners/{ownerId}"));
+	void testProcessUpdateOwnerFormHasErrors() {
+		webTestClient.post()
+			.uri("/owners/{ownerId}/edit", 2)
+			.contentType(MediaType.APPLICATION_FORM_URLENCODED)
+			.body(BodyInserters.fromFormData("firstName", "Joe")
+				.with("lastName", "Bloggs")
+				.with("address", "")
+				.with("telephone", ""))
+			.exchange()
+			.expectStatus()
+			.isOk()
+			.expectHeader()
+			.contentTypeCompatibleWith(MediaType.TEXT_HTML)
+			.expectBody()
+			.xpath("//input[@id='firstName']/@value")
+			.isEqualTo("Joe")
+			.xpath("//input[@id='lastName']/@value")
+			.isEqualTo("Bloggs")
+			.xpath("//input[@id='address']/@value")
+			.isEqualTo("")
+			.xpath("//input[@id='telephone']/@value")
+			.isEqualTo("")
+			.xpath("//input[@id='address']/ancestor::div[contains(@class, 'col-sm-10')]//span[@class='help-inline']")
+			.isEqualTo("must not be blank")
+			.xpath("//input[@id='telephone']/ancestor::div[contains(@class, 'col-sm-10')]//span[@class='help-inline']")
+			.string(error -> {
+				Assertions.assertTrue(error.contains("must not be blank"));
+				Assertions.assertTrue(error.contains("Telephone must be a 10-digit number"));
+			});
 	}
 
 	@Test
-	void testProcessUpdateOwnerFormHasErrors() throws Exception {
-		mockMvc
-			.perform(post("/owners/{ownerId}/edit", TEST_OWNER_ID).param("firstName", "Joe")
-				.param("lastName", "Bloggs")
-				.param("address", "")
-				.param("telephone", ""))
-			.andExpect(status().isOk())
-			.andExpect(model().attributeHasErrors("owner"))
-			.andExpect(model().attributeHasFieldErrors("owner", "address"))
-			.andExpect(model().attributeHasFieldErrors("owner", "telephone"))
-			.andExpect(view().name("owners/createOrUpdateOwnerForm"));
+	void testShowOwner() {
+		webTestClient.get()
+			.uri("/owners/{ownerId}", TEST_OWNER_ID)
+			.exchange()
+			.expectStatus()
+			.isOk()
+			.expectBody()
+			.xpath("//th[normalize-space(text())='Name']/following-sibling::td[b[normalize-space(text())='George Franklin']]")
+			.exists()
+			.xpath("//th[normalize-space(text())='Address']/following-sibling::td[normalize-space(text())='110 W. Liberty St.']")
+			.exists()
+			.xpath("//th[normalize-space(text())='City']/following-sibling::td[normalize-space(text())='Madison']")
+			.exists()
+			.xpath("//th[normalize-space(text())='Telephone']/following-sibling::td[normalize-space(text())='6085551023']")
+			.exists()
+			.xpath("//dt[normalize-space(text())='Name']/following-sibling::dd[1][normalize-space(text())='Leo']")
+			.exists();
 	}
 
 	@Test
-	void testShowOwner() throws Exception {
-		mockMvc.perform(get("/owners/{ownerId}", TEST_OWNER_ID))
-			.andExpect(status().isOk())
-			.andExpect(model().attribute("owner", hasProperty("lastName", is("Franklin"))))
-			.andExpect(model().attribute("owner", hasProperty("firstName", is("George"))))
-			.andExpect(model().attribute("owner", hasProperty("address", is("110 W. Liberty St."))))
-			.andExpect(model().attribute("owner", hasProperty("city", is("Madison"))))
-			.andExpect(model().attribute("owner", hasProperty("telephone", is("6085551023"))))
-			.andExpect(model().attribute("owner", hasProperty("pets", not(empty()))))
-			.andExpect(model().attribute("owner",
-					hasProperty("pets", hasItem(hasProperty("visits", hasSize(greaterThan(0)))))))
-			.andExpect(view().name("owners/ownerDetails"));
+	void testPageWithoutPagination() {
+		webTestClient.get()
+			.uri("/owners?page=1&lastName=Davis")
+			.exchange()
+			.expectStatus()
+			.isOk()
+			.expectBody()
+			.xpath("//a[@href='/owners?page=1' and text()='1']")
+			.doesNotExist();
 	}
 
 	@Test
-	public void testProcessUpdateOwnerFormWithIdMismatch() throws Exception {
-		int pathOwnerId = 1;
+	@DirtiesContext
+	void testPageWithPaginationWithNumberNotMultipleOf5() {
+		webTestClient.post()
+			.uri("/owners/new")
+			.contentType(MediaType.APPLICATION_FORM_URLENCODED)
+			.bodyValue("firstName=Joe&lastName=Bloggs&address=123 Caramel Street&city=London&telephone=1316761638")
+			.exchange()
+			.expectStatus()
+			.is3xxRedirection();
 
-		Owner owner = new Owner();
-		owner.setId(2);
-		owner.setFirstName("John");
-		owner.setLastName("Doe");
-		owner.setAddress("Center Street");
-		owner.setCity("New York");
-		owner.setTelephone("0123456789");
-
-		when(owners.findById(pathOwnerId)).thenReturn(Optional.of(owner));
-
-		mockMvc.perform(MockMvcRequestBuilders.post("/owners/{ownerId}/edit", pathOwnerId).flashAttr("owner", owner))
-			.andExpect(status().is3xxRedirection())
-			.andExpect(redirectedUrl("/owners/" + pathOwnerId + "/edit"))
-			.andExpect(flash().attributeExists("error"));
+		webTestClient.get()
+			.uri("/owners")
+			.exchange()
+			.expectStatus()
+			.isOk()
+			.expectBody()
+			.xpath("//a[@href='/owners?page=3' and text()='3']")
+			.exists();
 	}
 
 }

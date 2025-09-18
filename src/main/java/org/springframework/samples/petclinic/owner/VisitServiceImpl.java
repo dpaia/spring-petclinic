@@ -13,26 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.samples.petclinic.system;
+package org.springframework.samples.petclinic.owner;
 
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Mono;
 
-/**
- * Controller used to showcase what happens when an exception is thrown
- *
- * @author Michael Isvy
- * <p/>
- * Also see how a view that resolves to "error" has been added ("error.html").
- */
-@Controller
-class CrashController {
+@Service
+@Transactional(readOnly = true)
+public class VisitServiceImpl implements VisitService {
 
-	@GetMapping("/oups")
-	public Mono<String> triggerException() {
-		return Mono.error(new RuntimeException(
-				"Expected: controller used to showcase what " + "happens when an exception is thrown"));
+	private final VisitRepository visitRepository;
+
+	public VisitServiceImpl(VisitRepository visitRepository) {
+		this.visitRepository = visitRepository;
+	}
+
+	@Override
+	@Transactional
+	public Mono<Visit> save(Visit visit) {
+		return visitRepository.save(visit);
 	}
 
 }

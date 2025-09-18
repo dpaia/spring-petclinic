@@ -15,24 +15,17 @@
  */
 package org.springframework.samples.petclinic.system;
 
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import reactor.core.publisher.Mono;
+import org.springframework.boot.autoconfigure.cache.CacheManagerCustomizer;
+import org.springframework.cache.caffeine.CaffeineCacheManager;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
-/**
- * Controller used to showcase what happens when an exception is thrown
- *
- * @author Michael Isvy
- * <p/>
- * Also see how a view that resolves to "error" has been added ("error.html").
- */
-@Controller
-class CrashController {
+@Configuration
+public class CaffeineCacheManagerConfiguration {
 
-	@GetMapping("/oups")
-	public Mono<String> triggerException() {
-		return Mono.error(new RuntimeException(
-				"Expected: controller used to showcase what " + "happens when an exception is thrown"));
+	@Bean
+	public CacheManagerCustomizer<CaffeineCacheManager> caffeineCacheManagerCustomizer() {
+		return cacheManager -> cacheManager.setAsyncCacheMode(true);
 	}
 
 }

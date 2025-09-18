@@ -13,36 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.samples.petclinic.model;
+package org.springframework.samples.petclinic.owner;
 
-import java.io.Serializable;
+import org.springframework.data.r2dbc.repository.R2dbcRepository;
+import reactor.core.publisher.Flux;
 
-import org.springframework.data.annotation.Id;
-import org.springframework.data.relational.core.mapping.Column;
+public interface VisitRepository extends R2dbcRepository<Visit, Integer> {
 
-/**
- * Simple JavaBean domain object with an id property. Used as a base class for objects
- * needing this property.
- *
- * @author Ken Krebs
- * @author Juergen Hoeller
- */
-public class BaseEntity implements Serializable {
-
-	@Id
-	@Column("id")
-	private Integer id;
-
-	public Integer getId() {
-		return id;
-	}
-
-	public void setId(Integer id) {
-		this.id = id;
-	}
-
-	public boolean isNew() {
-		return this.id == null;
-	}
+	Flux<Visit> findByPetId(Integer petId);
 
 }

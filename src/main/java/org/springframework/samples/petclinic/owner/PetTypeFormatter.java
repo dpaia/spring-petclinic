@@ -15,12 +15,15 @@
  */
 package org.springframework.samples.petclinic.owner;
 
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.format.Formatter;
 import org.springframework.stereotype.Component;
 
 import java.text.ParseException;
-import java.util.Collection;
 import java.util.Locale;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Instructs Spring MVC on how to parse and print elements of type 'PetType'. Starting
@@ -37,8 +40,16 @@ public class PetTypeFormatter implements Formatter<PetType> {
 
 	private final PetTypeRepository types;
 
+	private final Map<String, PetType> petTypeCache = new ConcurrentHashMap<>();
+
 	public PetTypeFormatter(PetTypeRepository types) {
 		this.types = types;
+	}
+
+	@EventListener
+	public void onApplicationEvent(ContextRefreshedEvent event) {
+		// Populate the cache when the application starts
+		types.findAllByOrderByName().doOnNext(petType -> petTypeCache.put(petType.getName(), petType)).subscribe();
 	}
 
 	@Override
@@ -48,12 +59,12 @@ public class PetTypeFormatter implements Formatter<PetType> {
 
 	@Override
 	public PetType parse(String text, Locale locale) throws ParseException {
-		Collection<PetType> findPetTypes = this.types.findPetTypes();
-		for (PetType type : findPetTypes) {
-			if (type.getName().equals(text)) {
-				return type;
-			}
+		PetType petType = petTypeCache.get(text);
+		if (petType != null) {
+			return petType;
 		}
+
+		// If not found in the cache, throw an exception
 		throw new ParseException("type not found: " + text, 0);
 	}
 

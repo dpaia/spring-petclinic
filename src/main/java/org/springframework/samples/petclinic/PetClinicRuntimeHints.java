@@ -16,22 +16,73 @@
 
 package org.springframework.samples.petclinic;
 
+import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
 import org.springframework.samples.petclinic.model.BaseEntity;
+import org.springframework.samples.petclinic.model.NamedEntity;
 import org.springframework.samples.petclinic.model.Person;
+import org.springframework.samples.petclinic.owner.Owner;
+import org.springframework.samples.petclinic.owner.Pet;
+import org.springframework.samples.petclinic.owner.PetType;
+import org.springframework.samples.petclinic.owner.Visit;
+import org.springframework.samples.petclinic.vet.Specialty;
 import org.springframework.samples.petclinic.vet.Vet;
 
 public class PetClinicRuntimeHints implements RuntimeHintsRegistrar {
 
 	@Override
 	public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
+		// Resource hints
 		hints.resources().registerPattern("db/*"); // https://github.com/spring-projects/spring-boot/issues/32654
 		hints.resources().registerPattern("messages/*");
 		hints.resources().registerPattern("mysql-default-conf");
+		hints.resources().registerPattern("static/**");
+		hints.resources().registerPattern("templates/**");
+		hints.resources().registerPattern("banner.txt");
+		hints.resources().registerPattern("application.properties");
+		hints.resources().registerPattern("application-mysql.properties");
+		hints.resources().registerPattern("application-postgres.properties");
+
+		// Serialization hints
 		hints.serialization().registerType(BaseEntity.class);
+		hints.serialization().registerType(NamedEntity.class);
 		hints.serialization().registerType(Person.class);
+		hints.serialization().registerType(Owner.class);
+		hints.serialization().registerType(Pet.class);
+		hints.serialization().registerType(PetType.class);
+		hints.serialization().registerType(Visit.class);
+		hints.serialization().registerType(Specialty.class);
 		hints.serialization().registerType(Vet.class);
+
+		// Reflection hints for JPA entities
+		hints.reflection()
+			.registerType(BaseEntity.class, MemberCategory.DECLARED_FIELDS, MemberCategory.INVOKE_DECLARED_CONSTRUCTORS,
+					MemberCategory.INVOKE_DECLARED_METHODS);
+		hints.reflection()
+			.registerType(NamedEntity.class, MemberCategory.DECLARED_FIELDS,
+					MemberCategory.INVOKE_DECLARED_CONSTRUCTORS, MemberCategory.INVOKE_DECLARED_METHODS);
+		hints.reflection()
+			.registerType(Person.class, MemberCategory.DECLARED_FIELDS, MemberCategory.INVOKE_DECLARED_CONSTRUCTORS,
+					MemberCategory.INVOKE_DECLARED_METHODS);
+		hints.reflection()
+			.registerType(Owner.class, MemberCategory.DECLARED_FIELDS, MemberCategory.INVOKE_DECLARED_CONSTRUCTORS,
+					MemberCategory.INVOKE_DECLARED_METHODS);
+		hints.reflection()
+			.registerType(Pet.class, MemberCategory.DECLARED_FIELDS, MemberCategory.INVOKE_DECLARED_CONSTRUCTORS,
+					MemberCategory.INVOKE_DECLARED_METHODS);
+		hints.reflection()
+			.registerType(PetType.class, MemberCategory.DECLARED_FIELDS, MemberCategory.INVOKE_DECLARED_CONSTRUCTORS,
+					MemberCategory.INVOKE_DECLARED_METHODS);
+		hints.reflection()
+			.registerType(Visit.class, MemberCategory.DECLARED_FIELDS, MemberCategory.INVOKE_DECLARED_CONSTRUCTORS,
+					MemberCategory.INVOKE_DECLARED_METHODS);
+		hints.reflection()
+			.registerType(Specialty.class, MemberCategory.DECLARED_FIELDS, MemberCategory.INVOKE_DECLARED_CONSTRUCTORS,
+					MemberCategory.INVOKE_DECLARED_METHODS);
+		hints.reflection()
+			.registerType(Vet.class, MemberCategory.DECLARED_FIELDS, MemberCategory.INVOKE_DECLARED_CONSTRUCTORS,
+					MemberCategory.INVOKE_DECLARED_METHODS);
 	}
 
 }

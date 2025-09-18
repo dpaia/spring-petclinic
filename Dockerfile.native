@@ -1,0 +1,33 @@
+# Stage 1: Build the native image
+FROM bellsoft/hardened-liberica-native-image-kit-container:latest AS builder
+
+WORKDIR /app
+
+# Copy the Maven wrapper and pom.xml
+COPY .mvn/ .mvn/
+COPY mvnw pom.xml ./
+
+# Download dependencies (this layer can be cached)
+RUN ./mvnw -B dependency:go-offline
+
+# Copy the source code
+COPY src ./src/
+
+# Build the native image
+RUN ./mvnw -Pnative native:compile -DskipTests
+
+# Stage 2: Create a minimal runtime container
+FROM bellsoft/alpaquita-linux-base:latest
+
+# Set working directory
+WORKDIR /app
+
+
+# Copy the native executable from the builder stage
+COPY --from=builder /app/target/spring-petclinic .
+
+# Expose the application port
+EXPOSE 8080
+
+# Set the entry point to run the native executable
+ENTRYPOINT ["/app/spring-petclinic"]

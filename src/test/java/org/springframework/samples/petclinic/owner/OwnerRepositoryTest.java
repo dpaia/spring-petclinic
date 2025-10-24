@@ -55,6 +55,4 @@ public class OwnerRepositoryTest {
 		return owner;
 	}
 
-
-
 }

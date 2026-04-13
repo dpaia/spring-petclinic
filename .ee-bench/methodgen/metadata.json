@@ -1,0 +1,27 @@
+{
+  "version": "1.0",
+  "benchmark_type": "methodgen",
+  "language": "java",
+  "jvm_version": "17",
+  "target": {
+    "file": "",
+    "method_signature": "",
+    "stub": "",
+    "validations": []
+  },
+  "environment": {
+    "project_root": "/repo",
+    "docker": {
+      "run_params": {
+        "privileged": true,
+        "network": "host",
+        "volumes": ["/var/run/docker.sock:/var/run/docker.sock"],
+        "environment": {
+          "TESTCONTAINERS_RYUK_DISABLED": "true",
+          "TESTCONTAINERS_CHECKS_DISABLE": "true",
+          "DOCKER_HOST": "unix:///var/run/docker.sock"
+        }
+      }
+    }
+  }
+}

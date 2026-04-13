@@ -4,10 +4,13 @@
   "language": "java",
   "jvm_version": "17",
   "target": {
-    "file": "",
-    "method_signature": "",
-    "stub": "",
-    "validations": []
+    "file": "src/main/java/org/springframework/samples/petclinic/owner/OwnerController.java",
+    "method_signature": "findPaginatedForOwnersLastName(int,String)",
+    "stub": "private Object findPaginatedForOwnersLastName(int i, String s) {}",
+    "validations": [
+      {"type": "contains", "scope": "body_text", "pattern": "PageRequest"},
+      {"type": "contains", "scope": "body_text", "pattern": "findByLastNameStartingWith"}
+    ]
   },
   "environment": {
     "project_root": "/repo",

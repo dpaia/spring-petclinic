@@ -4,10 +4,15 @@
   "language": "java",
   "jvm_version": "17",
   "target": {
-    "file": "",
-    "method_signature": "",
-    "stub": "",
-    "validations": []
+    "file": "src/main/java/org/springframework/samples/petclinic/owner/PetController.java",
+    "method_signature": "processCreationForm(Owner,Pet,BindingResult,RedirectAttributes)",
+    "stub": "String processCreationForm(Owner owner, Pet pet, BindingResult result, RedirectAttributes redirectAttributes) {}",
+    "validations": [
+      {"type": "contains", "scope": "body_text", "pattern": "owner\\.addPet"},
+      {"type": "contains", "scope": "body_text", "pattern": "owners\\.save"},
+      {"type": "contains", "scope": "body_text", "pattern": "hasErrors\\(\\)"},
+      {"type": "test", "test_class": "org.springframework.samples.petclinic.owner.PetControllerProcessCreationFormTest"}
+    ]
   },
   "environment": {
     "project_root": "/repo",

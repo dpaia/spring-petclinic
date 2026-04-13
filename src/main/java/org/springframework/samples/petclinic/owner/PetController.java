@@ -102,7 +102,23 @@ class PetController {
 	@PostMapping("/pets/new")
 	public String processCreationForm(Owner owner, @Valid Pet pet, BindingResult result,
 			RedirectAttributes redirectAttributes) {
-		throw new UnsupportedOperationException("Not implemented yet");
+
+		if (StringUtils.hasText(pet.getName()) && pet.isNew() && owner.getPet(pet.getName(), true) != null)
+			result.rejectValue("name", "duplicate", "already exists");
+
+		LocalDate currentDate = LocalDate.now();
+		if (pet.getBirthDate() != null && pet.getBirthDate().isAfter(currentDate)) {
+			result.rejectValue("birthDate", "typeMismatch.birthDate");
+		}
+
+		if (result.hasErrors()) {
+			return VIEWS_PETS_CREATE_OR_UPDATE_FORM;
+		}
+
+		owner.addPet(pet);
+		this.owners.save(owner);
+		redirectAttributes.addFlashAttribute("message", "New Pet has been Added");
+		return "redirect:/owners/{ownerId}";
 	}
 
 	@GetMapping("/pets/{petId}/edit")

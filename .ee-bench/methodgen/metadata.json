@@ -4,10 +4,16 @@
   "language": "java",
   "jvm_version": "17",
   "target": {
-    "file": "",
-    "method_signature": "",
-    "stub": "",
-    "validations": []
+    "file": "src/main/java/org/springframework/samples/petclinic/owner/OwnerController.java",
+    "method_signature": "processFindForm(int,Owner,BindingResult,Model)",
+    "stub": "public String processFindForm(int page, Owner owner, BindingResult result, Model model) {}",
+    "validations": [
+      {"type": "contains", "scope": "body_text", "pattern": "findPaginatedForOwnersLastName"},
+      {"type": "contains", "scope": "body_text", "pattern": "rejectValue"},
+      {"type": "contains", "scope": "body_text", "pattern": "addPaginationModel"},
+      {"type": "contains", "scope": "body_text", "pattern": "redirect:/owners/"},
+      {"type": "test", "test_class": "org.springframework.samples.petclinic.owner.OwnerControllerProcessFindFormTest"}
+    ]
   },
   "environment": {
     "project_root": "/repo",

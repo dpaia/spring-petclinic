@@ -4,10 +4,15 @@
   "language": "java",
   "jvm_version": "17",
   "target": {
-    "file": "",
-    "method_signature": "",
-    "stub": "",
-    "validations": []
+    "file": "src/main/java/org/springframework/samples/petclinic/owner/OwnerController.java",
+    "method_signature": "processUpdateOwnerForm(Owner,BindingResult,int,RedirectAttributes)",
+    "stub": "public String processUpdateOwnerForm(Owner owner, BindingResult result, int ownerId, RedirectAttributes redirectAttributes) {}",
+    "validations": [
+      {"type": "contains", "scope": "body_text", "pattern": "hasErrors\\(\\)"},
+      {"type": "contains", "scope": "body_text", "pattern": "owners\\.save"},
+      {"type": "contains", "scope": "body_text", "pattern": "setId\\(ownerId\\)"},
+      {"type": "test", "test_class": "org.springframework.samples.petclinic.owner.OwnerControllerProcessUpdateOwnerFormTest"}
+    ]
   },
   "environment": {
     "project_root": "/repo",

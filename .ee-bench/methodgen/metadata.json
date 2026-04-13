@@ -4,10 +4,13 @@
   "language": "java",
   "jvm_version": "17",
   "target": {
-    "file": "",
-    "method_signature": "",
-    "stub": "",
-    "validations": []
+    "file": "src/main/java/org/springframework/samples/petclinic/owner/VisitController.java",
+    "method_signature": "loadPetWithVisit(int,int,Map)",
+    "stub": "public Visit loadPetWithVisit(int ownerId, int petId, Map<String, Object> model) {}",
+    "validations": [
+      {"type": "contains", "scope": "body_text", "pattern": "findById"},
+      {"type": "test", "test_class": "org.springframework.samples.petclinic.owner.VisitControllerLoadPetWithVisitTest"}
+    ]
   },
   "environment": {
     "project_root": "/repo",

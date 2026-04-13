@@ -4,10 +4,15 @@
   "language": "java",
   "jvm_version": "17",
   "target": {
-    "file": "",
-    "method_signature": "",
-    "stub": "",
-    "validations": []
+    "file": "src/main/java/org/springframework/samples/petclinic/owner/PetTypeFormatter.java",
+    "method_signature": "parse(String,Locale)",
+    "stub": "@Override\npublic PetType parse(String text, Locale locale) throws ParseException {}",
+    "validations": [
+      {"type": "contains", "scope": "method_text", "pattern": "@Override"},
+      {"type": "contains", "scope": "body_text", "pattern": "findPetTypes\\(\\)"},
+      {"type": "contains", "scope": "body_text", "pattern": "ParseException"},
+      {"type": "test", "test_class": "org.springframework.samples.petclinic.owner.PetTypeFormatterParseTest"}
+    ]
   },
   "environment": {
     "project_root": "/repo",

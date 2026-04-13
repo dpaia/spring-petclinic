@@ -62,17 +62,7 @@ class VisitController {
 	@ModelAttribute("visit")
 	public Visit loadPetWithVisit(@PathVariable("ownerId") int ownerId, @PathVariable("petId") int petId,
 			Map<String, Object> model) {
-		Optional<Owner> optionalOwner = owners.findById(ownerId);
-		Owner owner = optionalOwner.orElseThrow(() -> new IllegalArgumentException(
-				"Owner not found with id: " + ownerId + ". Please ensure the ID is correct "));
-
-		Pet pet = owner.getPet(petId);
-		model.put("pet", pet);
-		model.put("owner", owner);
-
-		Visit visit = new Visit();
-		pet.addVisit(visit);
-		return visit;
+		throw new UnsupportedOperationException("Not implemented yet");
 	}
 
 	// Spring MVC calls method loadPetWithVisit(...) before initNewVisitForm is

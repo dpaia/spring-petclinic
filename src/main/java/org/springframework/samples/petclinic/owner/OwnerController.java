@@ -124,10 +124,8 @@ class OwnerController {
 		return "owners/ownersList";
 	}
 
-	private Page<Owner> findPaginatedForOwnersLastName(int page, String lastname) {
-		int pageSize = 5;
-		Pageable pageable = PageRequest.of(page - 1, pageSize);
-		return owners.findByLastNameStartingWith(lastname, pageable);
+	private Object findPaginatedForOwnersLastName(int page, String lastname) {
+		throw new UnsupportedOperationException("Not implemented yet");
 	}
 
 	@GetMapping("/owners/{ownerId}/edit")

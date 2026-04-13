@@ -4,10 +4,16 @@
   "language": "java",
   "jvm_version": "17",
   "target": {
-    "file": "",
-    "method_signature": "",
-    "stub": "",
-    "validations": []
+    "file": "src/main/java/org/springframework/samples/petclinic/owner/PetValidator.java",
+    "method_signature": "validate(Object,Errors)",
+    "stub": "@Override\npublic void validate(Object target, Errors errors) {}",
+    "validations": [
+      {"type": "contains", "scope": "method_text", "pattern": "@Override"},
+      {"type": "contains", "scope": "body_text", "pattern": "rejectValue.*name"},
+      {"type": "contains", "scope": "body_text", "pattern": "rejectValue.*type"},
+      {"type": "contains", "scope": "body_text", "pattern": "rejectValue.*birthDate"},
+      {"type": "test", "test_class": "org.springframework.samples.petclinic.owner.PetValidatorValidateTest"}
+    ]
   },
   "environment": {
     "project_root": "/repo",

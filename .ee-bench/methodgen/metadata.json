@@ -4,10 +4,15 @@
   "language": "java",
   "jvm_version": "17",
   "target": {
-    "file": "",
-    "method_signature": "",
-    "stub": "",
-    "validations": []
+    "file": "src/main/java/org/springframework/samples/petclinic/owner/OwnerController.java",
+    "method_signature": "processCreationForm(Owner,BindingResult,RedirectAttributes)",
+    "stub": "public String processCreationForm(Owner owner, BindingResult result, RedirectAttributes redirectAttributes) {}",
+    "validations": [
+      {"type": "contains", "scope": "body_text", "pattern": "hasErrors\\(\\)"},
+      {"type": "contains", "scope": "body_text", "pattern": "owners\\.save"},
+      {"type": "contains", "scope": "body_text", "pattern": "addFlashAttribute"},
+      {"type": "test", "test_class": "org.springframework.samples.petclinic.owner.OwnerControllerProcessCreationFormTest"}
+    ]
   },
   "environment": {
     "project_root": "/repo",

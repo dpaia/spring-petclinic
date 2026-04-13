@@ -115,8 +115,13 @@ class OwnerController {
 		return addPaginationModel(page, model, ownersResults);
 	}
 
-	String addPaginationModel(int page, Model model, Page<Owner> paginated) {
-		throw new UnsupportedOperationException("Not implemented yet");
+	private String addPaginationModel(int page, Model model, Page<Owner> paginated) {
+		List<Owner> listOwners = paginated.getContent();
+		model.addAttribute("currentPage", page);
+		model.addAttribute("totalPages", paginated.getTotalPages());
+		model.addAttribute("totalItems", paginated.getTotalElements());
+		model.addAttribute("listOwners", listOwners);
+		return "owners/ownersList";
 	}
 
 	private Page<Owner> findPaginatedForOwnersLastName(int page, String lastname) {

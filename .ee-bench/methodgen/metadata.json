@@ -4,10 +4,16 @@
   "language": "java",
   "jvm_version": "17",
   "target": {
-    "file": "",
-    "method_signature": "",
-    "stub": "",
-    "validations": []
+    "file": "src/main/java/org/springframework/samples/petclinic/owner/OwnerController.java",
+    "method_signature": "addPaginationModel(int,Model,Page)",
+    "stub": "String addPaginationModel(int page, Model model, Page paginated) {}",
+    "validations": [
+      {"type": "contains", "scope": "body_text", "pattern": "getContent\\(\\)"},
+      {"type": "contains", "scope": "body_text", "pattern": "addAttribute.*current"},
+      {"type": "contains", "scope": "body_text", "pattern": "addAttribute.*total"},
+      {"type": "contains", "scope": "body_text", "pattern": "addAttribute.*wners"},
+      {"type": "contains", "scope": "body_text", "pattern": "owners/ownersList"}
+    ]
   },
   "environment": {
     "project_root": "/repo",

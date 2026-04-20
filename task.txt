@@ -1,0 +1,58 @@
+**Task Breakdown**
+
+**Overview**: 
+This task involves measuring the cold startup time difference between a regular JVM Spring Boot application and its GraalVM native image. We've used the Spring PetClinic application, which already has GraalVM native image support configured, and profiled the startup performance of both versions, focusing on the "/vets" REST API endpoint that performs database operations. We've also implemented a challenge variation to profile memory usage.
+
+**Task Instructions**: 
+We've implemented scripts to measure and compare the startup times and memory usage of the Spring PetClinic application running as a standard JVM JAR versus a GraalVM native image. The profiling focuses on cold startup performance and includes testing the "/vets" REST API endpoint that retrieves veterinarian data from the database. We've documented the results and analyzed the tradeoffs between the two approaches.
+
+**Implementation Tasks**:
+1. Created a script to build and run the application as a standard JVM JAR (measure-jvm-startup.sh)
+   - Uses Maven to build the application
+   - Measures the cold startup time by tracking how long it takes for the health endpoint to become available
+   - Tests the "/vets" REST API endpoint after startup
+   - Runs multiple times and calculates the average startup time
+
+2. Created a script to build and run the application as a GraalVM native image (measure-native-startup.sh)
+   - Uses the GraalVM native-maven-plugin to build the native image
+   - Measures the cold startup time using the same methodology as the JVM version
+   - Tests the "/vets" REST API endpoint after startup
+   - Runs multiple times and calculates the average startup time
+
+3. Created a script to compare the results (compare-results.sh)
+   - Reads the startup times from both measurements
+   - Calculates the speedup factor
+   - Generates a detailed report (startup-comparison-report.md) documenting the results and tradeoffs
+   - Provides a comprehensive analysis of when to use JVM vs. native image
+
+4. Implemented a challenge variation: Profile memory usage (profile-memory-usage.sh)
+   - Measures memory usage (RSS and VSZ) of both JVM and native image versions
+   - Records measurements every second for 30 seconds
+   - Generates load by hitting the "/vets" endpoint multiple times
+   - Creates a detailed report (memory-comparison-report.md) comparing memory footprints
+   - Optionally generates a visualization using gnuplot
+
+5. Created a validation script to ensure consistent testing (validate-endpoints.sh)
+   - Tests that the health and vets endpoints return correct status codes
+   - Validates the JSON content of the vets endpoint
+   - Tests the performance of the vets endpoint under load
+   - Provides a practical approach to validation that works with both JVM and native image versions
+
+**Key Findings**:
+
+1. Startup Performance:
+   - Native image provides significantly faster startup times compared to JVM
+   - The speedup factor depends on the application complexity but is typically 2-10x
+
+2. Memory Usage:
+   - Native image has a smaller initial memory footprint
+   - JVM memory usage increases during warm-up and stabilizes after garbage collection
+   - Native image memory usage is more stable and predictable
+
+3. Tradeoffs:
+   - Native image: Faster startup, lower memory footprint, but longer build time and limited reflection
+   - JVM: Better runtime optimization, easier debugging, but slower startup and higher memory usage
+
+4. Best Use Cases:
+   - Native image: Microservices, serverless functions, containerized applications
+   - JVM: Long-running applications, development environments, applications requiring extensive reflection

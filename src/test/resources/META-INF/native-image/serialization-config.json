@@ -1,0 +1,51 @@
+[
+  {
+    "name": "org.junit.jupiter.engine.descriptor.JupiterEngineDescriptor",
+    "fields": [
+      { "name": "uniqueId" },
+      { "name": "displayName" }
+    ]
+  },
+  {
+    "name": "org.junit.jupiter.engine.descriptor.ClassTestDescriptor",
+    "fields": [
+      { "name": "uniqueId" },
+      { "name": "displayName" },
+      { "name": "testClass" }
+    ]
+  },
+  {
+    "name": "org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor",
+    "fields": [
+      { "name": "uniqueId" },
+      { "name": "displayName" },
+      { "name": "testMethod" }
+    ]
+  },
+  {
+    "name": "org.springframework.samples.petclinic.breed.BreedService$BreedListResponse",
+    "fields": [
+      { "name": "status" },
+      { "name": "message" }
+    ]
+  },
+  {
+    "name": "org.springframework.samples.petclinic.breed.BreedService$BreedImageResponse",
+    "fields": [
+      { "name": "status" },
+      { "name": "message" }
+    ]
+  },
+  {
+    "name": "java.lang.Exception",
+    "fields": []
+  },
+  {
+    "name": "org.springframework.web.client.HttpServerErrorException",
+    "fields": []
+  },
+  {
+    "name": "org.springframework.web.client.HttpServerErrorException$InternalServerError",
+    "fields": []
+  }
+]

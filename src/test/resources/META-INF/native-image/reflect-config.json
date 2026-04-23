@@ -1,0 +1,189 @@
+[
+  {
+    "name": "org.springframework.web.servlet.i18n.SessionLocaleResolver",
+    "allDeclaredFields": true,
+    "allDeclaredMethods": true,
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "org.springframework.web.servlet.i18n.LocaleChangeInterceptor",
+    "allDeclaredFields": true,
+    "allDeclaredMethods": true,
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "java.util.Locale",
+    "allDeclaredFields": true,
+    "allDeclaredMethods": true,
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "org.springframework.samples.petclinic.system.WebConfiguration",
+    "allDeclaredFields": true,
+    "allDeclaredMethods": true,
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "org.springframework.samples.petclinic.breed.BreedService$BreedListResponse",
+    "allDeclaredFields": true,
+    "allDeclaredMethods": true,
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "org.springframework.samples.petclinic.breed.BreedService$BreedImageResponse",
+    "allDeclaredFields": true,
+    "allDeclaredMethods": true,
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "java.util.List",
+    "allDeclaredMethods": true
+  },
+  {
+    "name": "org.springframework.test.web.client.MockRestServiceServer",
+    "allDeclaredFields": true,
+    "allDeclaredMethods": true,
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "org.springframework.test.web.client.match.MockRestRequestMatchers",
+    "allDeclaredFields": true,
+    "allDeclaredMethods": true,
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "org.springframework.test.web.client.response.MockRestResponseCreators",
+    "allDeclaredFields": true,
+    "allDeclaredMethods": true,
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "org.springframework.samples.petclinic.breed.BreedServiceTests",
+    "allDeclaredFields": true,
+    "allDeclaredMethods": true,
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "org.springframework.samples.petclinic.breed.BreedServiceIntegrationTests",
+    "allDeclaredFields": true,
+    "allDeclaredMethods": true,
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "org.assertj.core.api.Assertions",
+    "allDeclaredMethods": true
+  },
+  {
+    "name": "org.junit.jupiter.api.Test",
+    "allDeclaredMethods": true
+  },
+  {
+    "name": "org.junit.jupiter.api.BeforeEach",
+    "allDeclaredMethods": true
+  },
+  {
+    "name": "org.junit.jupiter.engine.JupiterTestEngine",
+    "allDeclaredFields": true,
+    "allDeclaredMethods": true,
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "org.junit.jupiter.engine.descriptor.JupiterEngineDescriptor",
+    "allDeclaredFields": true,
+    "allDeclaredMethods": true,
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor",
+    "allDeclaredFields": true,
+    "allDeclaredMethods": true,
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "org.junit.jupiter.engine.descriptor.ClassTestDescriptor",
+    "allDeclaredFields": true,
+    "allDeclaredMethods": true,
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "org.junit.jupiter.engine.execution.InvocationInterceptorChain$ValidatingInvocation",
+    "allDeclaredFields": true,
+    "allDeclaredMethods": true,
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "org.springframework.web.client.DefaultResponseErrorHandler",
+    "allDeclaredFields": true,
+    "allDeclaredMethods": true,
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "org.springframework.web.client.HttpServerErrorException",
+    "allDeclaredFields": true,
+    "allDeclaredMethods": true,
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "org.springframework.web.client.HttpServerErrorException$InternalServerError",
+    "allDeclaredFields": true,
+    "allDeclaredMethods": true,
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "org.springframework.boot.test.context.SpringBootTest",
+    "allDeclaredMethods": true
+  },
+  {
+    "name": "org.springframework.samples.petclinic.breed.BreedServiceNativeTests",
+    "allDeclaredFields": true,
+    "allDeclaredMethods": true,
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "org.springframework.samples.petclinic.breed.BreedServiceNativeTests$TestConfig",
+    "allDeclaredFields": true,
+    "allDeclaredMethods": true,
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "org.springframework.boot.web.client.RestTemplateBuilder",
+    "allDeclaredFields": true,
+    "allDeclaredMethods": true,
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "org.springframework.http.client.ClientHttpRequestFactory",
+    "queryAllDeclaredMethods": true,
+    "queryAllPublicMethods": true
+  },
+  {
+    "name": "org.springframework.test.web.client.RequestMatcher",
+    "queryAllDeclaredMethods": true,
+    "queryAllPublicMethods": true
+  },
+  {
+    "name": "org.springframework.test.web.client.ResponseCreator",
+    "queryAllDeclaredMethods": true,
+    "queryAllPublicMethods": true
+  },
+  {
+    "name": "org.springframework.test.web.client.ResponseActions",
+    "queryAllDeclaredMethods": true,
+    "queryAllPublicMethods": true
+  },
+  {
+    "name": "org.springframework.test.context.BootstrapUtils",
+    "allDeclaredMethods": true,
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "org.springframework.test.context.web.WebAppConfiguration",
+    "allDeclaredMethods": true,
+    "allDeclaredConstructors": true
+  },
+  {
+    "name" : "org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate",
+    "allDeclaredMethods": true,
+    "allDeclaredConstructors": true
+  }
+]

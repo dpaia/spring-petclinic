@@ -33,6 +33,7 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.NotBlank;
+import org.springframework.samples.petclinic.model.validation.ValidAddress;
 
 /**
  * Simple JavaBean domain object representing an owner.
@@ -50,6 +51,7 @@ public class Owner extends Person {
 
 	@Column(name = "address")
 	@NotBlank
+	@ValidAddress
 	private String address;
 
 	@Column(name = "city")

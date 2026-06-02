@@ -95,4 +95,41 @@ class ValidatorTests {
 		assertThat(violation.getMessage()).isEqualTo("must be a well-formed email address");
 	}
 
+	@Test
+	void shouldValidateWhenAddressFormatIsValid() {
+		LocaleContextHolder.setLocale(Locale.ENGLISH);
+		Owner owner = new Owner();
+		owner.setFirstName("John");
+		owner.setLastName("Doe");
+		owner.setAddress("123 Main St");
+		owner.setCity("New York");
+		owner.setTelephone("1234567890");
+		owner.setEmail("john.doe@example.com");
+
+		Validator validator = createValidator();
+		Set<ConstraintViolation<Owner>> constraintViolations = validator.validate(owner);
+
+		assertThat(constraintViolations).isEmpty();
+	}
+
+	@Test
+	void shouldNotValidateWhenAddressFormatIsInvalid() {
+		LocaleContextHolder.setLocale(Locale.ENGLISH);
+		Owner owner = new Owner();
+		owner.setFirstName("John");
+		owner.setLastName("Doe");
+		owner.setAddress("Main Street"); // Missing street number
+		owner.setCity("New York");
+		owner.setTelephone("1234567890");
+		owner.setEmail("john.doe@example.com");
+
+		Validator validator = createValidator();
+		Set<ConstraintViolation<Owner>> constraintViolations = validator.validate(owner);
+
+		assertThat(constraintViolations).hasSize(1);
+		ConstraintViolation<Owner> violation = constraintViolations.iterator().next();
+		assertThat(violation.getPropertyPath()).hasToString("address");
+		assertThat(violation.getMessage()).isEqualTo("{address.invalid}");
+	}
+
 }

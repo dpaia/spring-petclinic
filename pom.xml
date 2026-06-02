@@ -79,13 +79,13 @@
       <scope>runtime</scope>
     </dependency>
     <dependency>
-      <groupId>com.mysql</groupId>
-      <artifactId>mysql-connector-j</artifactId>
+      <groupId>io.asyncer</groupId>
+      <artifactId>r2dbc-mysql</artifactId>
       <scope>runtime</scope>
     </dependency>
     <dependency>
       <groupId>org.postgresql</groupId>
-      <artifactId>postgresql</artifactId>
+      <artifactId>r2dbc-postgresql</artifactId>
       <scope>runtime</scope>
     </dependency>
 

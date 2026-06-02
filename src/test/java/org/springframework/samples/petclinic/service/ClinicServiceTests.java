@@ -25,13 +25,11 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.autoconfigure.data.r2dbc.DataR2dbcTest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.samples.petclinic.owner.*;
 import org.springframework.samples.petclinic.vet.*;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.test.annotation.DirtiesContext;
 
 /**
  * Integration test of the Service and the Repository layer.
@@ -61,10 +59,8 @@ import org.springframework.transaction.annotation.Transactional;
  * @author Michael Isvy
  * @author Dave Syer
  */
-@DataJpaTest
-// Ensure that if the mysql profile is active we connect to the real database:
-@AutoConfigureTestDatabase(replace = Replace.NONE)
-// @TestPropertySource("/application-postgres.properties")
+@DataR2dbcTest
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class ClinicServiceTests {
 
 	@Autowired
@@ -99,7 +95,6 @@ class ClinicServiceTests {
 	}
 
 	@Test
-	@Transactional
 	void shouldInsertOwner() {
 		List<Owner> owners = this.owners.findByLastNameStartingWith("Schultz", pageable).collectList().block();
 		int found = owners.size();
@@ -118,7 +113,6 @@ class ClinicServiceTests {
 	}
 
 	@Test
-	@Transactional
 	void shouldUpdateOwner() {
 		Optional<Owner> optionalOwner = this.owners.findById(1).blockOptional();
 		assertThat(optionalOwner).isPresent();
@@ -147,7 +141,6 @@ class ClinicServiceTests {
 	}
 
 	@Test
-	@Transactional
 	void shouldInsertPetIntoDatabaseAndGenerateId() {
 		Optional<Owner> optionalOwner = this.owners.findById(6).blockOptional();
 		assertThat(optionalOwner).isPresent();
@@ -175,7 +168,6 @@ class ClinicServiceTests {
 	}
 
 	@Test
-	@Transactional
 	void shouldUpdatePetName() {
 		Optional<Owner> optionalOwner = this.owners.findById(6).blockOptional();
 		assertThat(optionalOwner).isPresent();
@@ -207,7 +199,6 @@ class ClinicServiceTests {
 	}
 
 	@Test
-	@Transactional
 	void shouldAddNewVisitForPet() {
 		Optional<Owner> optionalOwner = this.owners.findById(6).blockOptional();
 		assertThat(optionalOwner).isPresent();

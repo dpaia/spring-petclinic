@@ -13,26 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.samples.petclinic.owner;
 
-import org.springframework.data.r2dbc.repository.Query;
-import org.springframework.data.r2dbc.repository.R2dbcRepository;
+import org.springframework.data.domain.Pageable;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
-/**
- * Repository class for <code>PetType</code> domain objects.
- *
- * @author Patrick Baumgartner
- */
+public interface OwnerRepositoryCustom {
 
-public interface PetTypeRepository extends R2dbcRepository<PetType, Integer> {
+	Mono<Owner> findById(Integer id);
 
-	/**
-	 * Retrieve all {@link PetType}s from the data store ordered by name.
-	 * @return a Flux of {@link PetType}s.
-	 */
-	@Query("SELECT id, name FROM types ORDER BY name")
-	Flux<PetType> findPetTypes();
+	Flux<Owner> findByLastNameStartingWith(String lastName, Pageable pageable);
+
+	<S extends Owner> Mono<S> save(S owner);
 
 }

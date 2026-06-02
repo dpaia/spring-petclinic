@@ -16,8 +16,9 @@
 package org.springframework.samples.petclinic.owner;
 
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.r2dbc.repository.R2dbcRepository;
+import org.springframework.data.repository.Repository;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 /**
  * Repository class for <code>Owner</code> domain objects. All method names are compliant
@@ -31,7 +32,7 @@ import reactor.core.publisher.Flux;
  * @author Michael Isvy
  * @author Wick Dynex
  */
-public interface OwnerRepository extends R2dbcRepository<Owner, Integer> {
+public interface OwnerRepository extends Repository<Owner, Integer>, OwnerRepositoryCustom {
 
 	/**
 	 * Retrieve {@link Owner}s from the data store by last name, returning all owners
@@ -41,5 +42,9 @@ public interface OwnerRepository extends R2dbcRepository<Owner, Integer> {
 	 * @return a Flux of matching {@link Owner}s (or an empty Flux if none found)
 	 */
 	Flux<Owner> findByLastNameStartingWith(String lastName, Pageable pageable);
+
+	Mono<Owner> findById(Integer id);
+
+	<S extends Owner> Mono<S> save(S owner);
 
 }

@@ -19,6 +19,9 @@ import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,6 +30,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -52,11 +56,16 @@ public class VisitRestController {
 
 	/**
 	 * Get all visits
-	 * @return a list of all visits
+	 * @param page the page number (1-based, defaults to 1)
+	 * @param size the page size (defaults to 10)
+	 * @return a page of visits
 	 */
 	@GetMapping("/visits")
-	public ResponseEntity<List<Visit>> getAllVisits() {
-		List<Visit> visits = this.visitRepository.findAll();
+	public ResponseEntity<Page<Visit>> getAllVisits(@RequestParam(defaultValue = "1") int page,
+			@RequestParam(defaultValue = "10") int size) {
+
+		Pageable pageable = PageRequest.of(page - 1, size);
+		Page<Visit> visits = this.visitRepository.findAll(pageable);
 		return ResponseEntity.ok(visits);
 	}
 
@@ -74,16 +83,21 @@ public class VisitRestController {
 	/**
 	 * Get all visits for a specific pet
 	 * @param petId the pet ID
-	 * @return a list of visits for the given pet
+	 * @param page the page number (1-based, defaults to 1)
+	 * @param size the page size (defaults to 10)
+	 * @return a page of visits for the given pet
 	 */
 	@GetMapping("/pets/{petId}/visits")
-	public ResponseEntity<List<Visit>> getVisitsByPet(@PathVariable("petId") int petId) {
+	public ResponseEntity<Page<Visit>> getVisitsByPet(@PathVariable("petId") int petId,
+			@RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "10") int size) {
+
 		// Check if pet exists
 		if (!this.petRepository.existsById(petId)) {
 			return ResponseEntity.notFound().build();
 		}
 
-		List<Visit> visits = this.visitRepository.findByPetId(petId);
+		Pageable pageable = PageRequest.of(page - 1, size);
+		Page<Visit> visits = this.visitRepository.findByPetId(petId, pageable);
 		return ResponseEntity.ok(visits);
 	}
 

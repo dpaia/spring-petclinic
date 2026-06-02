@@ -19,6 +19,9 @@ import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -28,6 +31,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -57,11 +61,16 @@ public class PetRestController {
 
 	/**
 	 * Get all pets
-	 * @return a list of all pets
+	 * @param page the page number (1-based, defaults to 1)
+	 * @param size the page size (defaults to 10)
+	 * @return a page of pets
 	 */
 	@GetMapping("/pets")
-	public ResponseEntity<List<Pet>> getAllPets() {
-		List<Pet> pets = this.petRepository.findAll();
+	public ResponseEntity<Page<Pet>> getAllPets(@RequestParam(defaultValue = "1") int page,
+			@RequestParam(defaultValue = "10") int size) {
+
+		Pageable pageable = PageRequest.of(page - 1, size);
+		Page<Pet> pets = this.petRepository.findAll(pageable);
 		return ResponseEntity.ok(pets);
 	}
 
@@ -79,16 +88,21 @@ public class PetRestController {
 	/**
 	 * Get all pets for a specific owner
 	 * @param ownerId the owner ID
-	 * @return a list of pets for the given owner
+	 * @param page the page number (1-based, defaults to 1)
+	 * @param size the page size (defaults to 10)
+	 * @return a page of pets for the given owner
 	 */
 	@GetMapping("/owners/{ownerId}/pets")
-	public ResponseEntity<List<Pet>> getPetsByOwner(@PathVariable("ownerId") int ownerId) {
+	public ResponseEntity<Page<Pet>> getPetsByOwner(@PathVariable("ownerId") int ownerId,
+			@RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "10") int size) {
+
 		// Check if owner exists
 		if (!this.ownerRepository.existsById(ownerId)) {
 			return ResponseEntity.notFound().build();
 		}
 
-		List<Pet> pets = this.petRepository.findByOwnerId(ownerId);
+		Pageable pageable = PageRequest.of(page - 1, size);
+		Page<Pet> pets = this.petRepository.findByOwnerId(ownerId, pageable);
 		return ResponseEntity.ok(pets);
 	}
 

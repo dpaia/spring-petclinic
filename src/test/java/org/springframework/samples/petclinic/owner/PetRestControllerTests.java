@@ -20,6 +20,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.json.JacksonTester;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -83,18 +87,30 @@ class PetRestControllerTests {
 		pet2.setType(dog);
 
 		List<Pet> pets = Arrays.asList(pet1, pet2);
-		given(this.petRepository.findAll()).willReturn(pets);
+		Page<Pet> petsPage = new PageImpl<>(pets, PageRequest.of(0, 10), pets.size());
+		given(this.petRepository.findAll(any(Pageable.class))).willReturn(petsPage);
 
 		// when
 		mockMvc.perform(get("/api/pets"))
 			// then
 			.andExpect(status().isOk())
 			.andExpect(content().contentType(MediaType.APPLICATION_JSON))
-			.andExpect(jsonPath("$", hasSize(2)))
-			.andExpect(jsonPath("$[0].id", is(1)))
-			.andExpect(jsonPath("$[0].name", is("Leo")))
-			.andExpect(jsonPath("$[1].id", is(2)))
-			.andExpect(jsonPath("$[1].name", is("Basil")));
+			.andExpect(jsonPath("$.content", hasSize(2)))
+			.andExpect(jsonPath("$.content[0].id", is(1)))
+			.andExpect(jsonPath("$.content[0].name", is("Leo")))
+			.andExpect(jsonPath("$.content[1].id", is(2)))
+			.andExpect(jsonPath("$.content[1].name", is("Basil")))
+			.andExpect(jsonPath("$.pageable.pageNumber", is(0)))
+			.andExpect(jsonPath("$.pageable.pageSize", is(10)))
+			.andExpect(jsonPath("$.totalElements", is(2)));
+
+		// Test with custom page and size parameters
+		mockMvc.perform(get("/api/pets?page=2&size=5"))
+			.andExpect(status().isOk())
+			.andExpect(content().contentType(MediaType.APPLICATION_JSON))
+			.andExpect(jsonPath("$.content", hasSize(2)));
+
+		verify(this.petRepository, times(2)).findAll(any(Pageable.class));
 	}
 
 	@Test
@@ -155,19 +171,31 @@ class PetRestControllerTests {
 		pet2.setType(dog);
 
 		List<Pet> pets = Arrays.asList(pet1, pet2);
+		Page<Pet> petsPage = new PageImpl<>(pets, PageRequest.of(0, 10), pets.size());
 		given(this.ownerRepository.existsById(1)).willReturn(true);
-		given(this.petRepository.findByOwnerId(1)).willReturn(pets);
+		given(this.petRepository.findByOwnerId(eq(1), any(Pageable.class))).willReturn(petsPage);
 
 		// when
 		mockMvc.perform(get("/api/owners/1/pets"))
 			// then
 			.andExpect(status().isOk())
 			.andExpect(content().contentType(MediaType.APPLICATION_JSON))
-			.andExpect(jsonPath("$", hasSize(2)))
-			.andExpect(jsonPath("$[0].id", is(1)))
-			.andExpect(jsonPath("$[0].name", is("Leo")))
-			.andExpect(jsonPath("$[1].id", is(2)))
-			.andExpect(jsonPath("$[1].name", is("Basil")));
+			.andExpect(jsonPath("$.content", hasSize(2)))
+			.andExpect(jsonPath("$.content[0].id", is(1)))
+			.andExpect(jsonPath("$.content[0].name", is("Leo")))
+			.andExpect(jsonPath("$.content[1].id", is(2)))
+			.andExpect(jsonPath("$.content[1].name", is("Basil")))
+			.andExpect(jsonPath("$.pageable.pageNumber", is(0)))
+			.andExpect(jsonPath("$.pageable.pageSize", is(10)))
+			.andExpect(jsonPath("$.totalElements", is(2)));
+
+		// Test with custom page and size parameters
+		mockMvc.perform(get("/api/owners/1/pets?page=2&size=5"))
+			.andExpect(status().isOk())
+			.andExpect(content().contentType(MediaType.APPLICATION_JSON))
+			.andExpect(jsonPath("$.content", hasSize(2)));
+
+		verify(this.petRepository, times(2)).findByOwnerId(eq(1), any(Pageable.class));
 	}
 
 	@Test

@@ -17,6 +17,8 @@ package org.springframework.samples.petclinic.owner;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -32,6 +34,15 @@ public interface VisitRepository extends JpaRepository<Visit, Integer> {
 
 	/**
 	 * Find all visits for a given pet
+	 * @param petId the pet ID
+	 * @param pageable pagination information
+	 * @return a page of visits
+	 */
+	@Query("SELECT visit FROM Visit visit WHERE visit.id IN (SELECT v.id FROM Pet pet JOIN pet.visits v WHERE pet.id = :petId)")
+	Page<Visit> findByPetId(@Param("petId") Integer petId, Pageable pageable);
+
+	/**
+	 * Find all visits for a given pet (non-paginated)
 	 * @param petId the pet ID
 	 * @return a list of visits
 	 */

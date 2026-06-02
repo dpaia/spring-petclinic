@@ -20,6 +20,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.json.JacksonTester;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -72,20 +76,32 @@ class VisitRestControllerTests {
 		visit2.setDescription("Rabies vaccination");
 
 		List<Visit> visits = Arrays.asList(visit1, visit2);
-		given(this.visitRepository.findAll()).willReturn(visits);
+		Page<Visit> visitsPage = new PageImpl<>(visits, PageRequest.of(0, 10), visits.size());
+		given(this.visitRepository.findAll(any(Pageable.class))).willReturn(visitsPage);
 
 		// when
 		mockMvc.perform(get("/api/visits"))
 			// then
 			.andExpect(status().isOk())
 			.andExpect(content().contentType(MediaType.APPLICATION_JSON))
-			.andExpect(jsonPath("$", hasSize(2)))
-			.andExpect(jsonPath("$[0].id", is(1)))
-			.andExpect(jsonPath("$[0].date", is("2023-01-01")))
-			.andExpect(jsonPath("$[0].description", is("Annual checkup")))
-			.andExpect(jsonPath("$[1].id", is(2)))
-			.andExpect(jsonPath("$[1].date", is("2023-02-15")))
-			.andExpect(jsonPath("$[1].description", is("Rabies vaccination")));
+			.andExpect(jsonPath("$.content", hasSize(2)))
+			.andExpect(jsonPath("$.content[0].id", is(1)))
+			.andExpect(jsonPath("$.content[0].date", is("2023-01-01")))
+			.andExpect(jsonPath("$.content[0].description", is("Annual checkup")))
+			.andExpect(jsonPath("$.content[1].id", is(2)))
+			.andExpect(jsonPath("$.content[1].date", is("2023-02-15")))
+			.andExpect(jsonPath("$.content[1].description", is("Rabies vaccination")))
+			.andExpect(jsonPath("$.pageable.pageNumber", is(0)))
+			.andExpect(jsonPath("$.pageable.pageSize", is(10)))
+			.andExpect(jsonPath("$.totalElements", is(2)));
+
+		// Test with custom page and size parameters
+		mockMvc.perform(get("/api/visits?page=2&size=5"))
+			.andExpect(status().isOk())
+			.andExpect(content().contentType(MediaType.APPLICATION_JSON))
+			.andExpect(jsonPath("$.content", hasSize(2)));
+
+		verify(this.visitRepository, times(2)).findAll(any(Pageable.class));
 	}
 
 	@Test
@@ -133,21 +149,33 @@ class VisitRestControllerTests {
 		visit2.setDescription("Rabies vaccination");
 
 		List<Visit> visits = Arrays.asList(visit1, visit2);
+		Page<Visit> visitsPage = new PageImpl<>(visits, PageRequest.of(0, 10), visits.size());
 		given(this.petRepository.existsById(1)).willReturn(true);
-		given(this.visitRepository.findByPetId(1)).willReturn(visits);
+		given(this.visitRepository.findByPetId(eq(1), any(Pageable.class))).willReturn(visitsPage);
 
 		// when
 		mockMvc.perform(get("/api/pets/1/visits"))
 			// then
 			.andExpect(status().isOk())
 			.andExpect(content().contentType(MediaType.APPLICATION_JSON))
-			.andExpect(jsonPath("$", hasSize(2)))
-			.andExpect(jsonPath("$[0].id", is(1)))
-			.andExpect(jsonPath("$[0].date", is("2023-01-01")))
-			.andExpect(jsonPath("$[0].description", is("Annual checkup")))
-			.andExpect(jsonPath("$[1].id", is(2)))
-			.andExpect(jsonPath("$[1].date", is("2023-02-15")))
-			.andExpect(jsonPath("$[1].description", is("Rabies vaccination")));
+			.andExpect(jsonPath("$.content", hasSize(2)))
+			.andExpect(jsonPath("$.content[0].id", is(1)))
+			.andExpect(jsonPath("$.content[0].date", is("2023-01-01")))
+			.andExpect(jsonPath("$.content[0].description", is("Annual checkup")))
+			.andExpect(jsonPath("$.content[1].id", is(2)))
+			.andExpect(jsonPath("$.content[1].date", is("2023-02-15")))
+			.andExpect(jsonPath("$.content[1].description", is("Rabies vaccination")))
+			.andExpect(jsonPath("$.pageable.pageNumber", is(0)))
+			.andExpect(jsonPath("$.pageable.pageSize", is(10)))
+			.andExpect(jsonPath("$.totalElements", is(2)));
+
+		// Test with custom page and size parameters
+		mockMvc.perform(get("/api/pets/1/visits?page=2&size=5"))
+			.andExpect(status().isOk())
+			.andExpect(content().contentType(MediaType.APPLICATION_JSON))
+			.andExpect(jsonPath("$.content", hasSize(2)));
+
+		verify(this.visitRepository, times(2)).findByPetId(eq(1), any(Pageable.class));
 	}
 
 	@Test

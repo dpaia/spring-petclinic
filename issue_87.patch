@@ -1,0 +1,213 @@
+diff --git a/src/main/java/org/springframework/samples/petclinic/medication/Medication.java b/src/main/java/org/springframework/samples/petclinic/medication/Medication.java
+new file mode 100644
+index 00000000000..f4dad7ef926
+--- /dev/null
++++ b/src/main/java/org/springframework/samples/petclinic/medication/Medication.java
+@@ -0,0 +1,45 @@
++package org.springframework.samples.petclinic.medication;
++
++import java.util.UUID;
++
++import jakarta.persistence.Column;
++import jakarta.persistence.Entity;
++import jakarta.persistence.Id;
++import jakarta.persistence.Table;
++import jakarta.persistence.GeneratedValue;
++import jakarta.persistence.GenerationType;
++import jakarta.validation.constraints.NotBlank;
++
++import org.hibernate.annotations.JdbcTypeCode;
++import org.hibernate.type.SqlTypes;
++
++@Entity
++@Table(name = "medications")
++public class Medication {
++
++	@Id
++	@GeneratedValue(strategy = GenerationType.UUID)
++	@JdbcTypeCode(SqlTypes.VARCHAR)
++	@Column(name = "id", length = 36, nullable = false, updatable = false)
++	private UUID id;
++
++	@NotBlank
++	@Column(name = "name", nullable = false)
++	private String name;
++
++	public UUID getId() {
++		return id;
++	}
++
++	public void setId(UUID id) {
++		this.id = id;
++	}
++
++	public String getName() {
++		return name;
++	}
++
++	public void setName(String name) {
++		this.name = name;
++	}
++}
+diff --git a/src/main/java/org/springframework/samples/petclinic/medication/MedicationRepository.java b/src/main/java/org/springframework/samples/petclinic/medication/MedicationRepository.java
+new file mode 100644
+index 00000000000..de262c22380
+--- /dev/null
++++ b/src/main/java/org/springframework/samples/petclinic/medication/MedicationRepository.java
+@@ -0,0 +1,23 @@
++/*
++ * Copyright 2012-2025 the original author or authors.
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *      https://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ */
++package org.springframework.samples.petclinic.medication;
++
++import java.util.UUID;
++
++import org.springframework.data.jpa.repository.JpaRepository;
++
++public interface MedicationRepository extends JpaRepository<Medication, UUID> {
++}
+diff --git a/src/main/resources/db/h2/schema.sql b/src/main/resources/db/h2/schema.sql
+index 4a6c322cbcc..ac5df477054 100644
+--- a/src/main/resources/db/h2/schema.sql
++++ b/src/main/resources/db/h2/schema.sql
+@@ -5,6 +5,7 @@ DROP TABLE visits IF EXISTS;
+ DROP TABLE pets IF EXISTS;
+ DROP TABLE types IF EXISTS;
+ DROP TABLE owners IF EXISTS;
++DROP TABLE medications IF EXISTS;
+ 
+ 
+ CREATE TABLE vets (
+@@ -62,3 +63,9 @@ CREATE TABLE visits (
+ );
+ ALTER TABLE visits ADD CONSTRAINT fk_visits_pets FOREIGN KEY (pet_id) REFERENCES pets (id);
+ CREATE INDEX visits_pet_id ON visits (pet_id);
++
++
++CREATE TABLE medications (
++  id   VARCHAR(36) PRIMARY KEY,
++  name VARCHAR(255) NOT NULL
++);
+diff --git a/src/main/resources/db/hsqldb/schema.sql b/src/main/resources/db/hsqldb/schema.sql
+index 5d6760a4bf2..38f058dfcf1 100644
+--- a/src/main/resources/db/hsqldb/schema.sql
++++ b/src/main/resources/db/hsqldb/schema.sql
+@@ -5,6 +5,7 @@ DROP TABLE visits IF EXISTS;
+ DROP TABLE pets IF EXISTS;
+ DROP TABLE types IF EXISTS;
+ DROP TABLE owners IF EXISTS;
++DROP TABLE medications IF EXISTS;
+ 
+ 
+ CREATE TABLE vets (
+@@ -62,3 +63,9 @@ CREATE TABLE visits (
+ );
+ ALTER TABLE visits ADD CONSTRAINT fk_visits_pets FOREIGN KEY (pet_id) REFERENCES pets (id);
+ CREATE INDEX visits_pet_id ON visits (pet_id);
++
++
++CREATE TABLE medications (
++  id   VARCHAR(36) PRIMARY KEY,
++  name VARCHAR(255) NOT NULL
++);
+diff --git a/src/main/resources/db/mysql/schema.sql b/src/main/resources/db/mysql/schema.sql
+index 2591a516dea..c1a2788b48a 100644
+--- a/src/main/resources/db/mysql/schema.sql
++++ b/src/main/resources/db/mysql/schema.sql
+@@ -53,3 +53,8 @@ CREATE TABLE IF NOT EXISTS visits (
+   description VARCHAR(255),
+   FOREIGN KEY (pet_id) REFERENCES pets(id)
+ ) engine=InnoDB;
++
++CREATE TABLE IF NOT EXISTS medications (
++  id VARCHAR(36) NOT NULL PRIMARY KEY,
++  name VARCHAR(255) NOT NULL
++) engine=InnoDB;
+diff --git a/src/main/resources/db/postgres/schema.sql b/src/main/resources/db/postgres/schema.sql
+index 1bd582dc20c..b6f0791e9da 100644
+--- a/src/main/resources/db/postgres/schema.sql
++++ b/src/main/resources/db/postgres/schema.sql
+@@ -50,3 +50,8 @@ CREATE TABLE IF NOT EXISTS visits (
+   description TEXT
+ );
+ CREATE INDEX ON visits (pet_id);
++
++CREATE TABLE IF NOT EXISTS medications (
++  id   VARCHAR(36) PRIMARY KEY,
++  name TEXT NOT NULL
++);
+diff --git a/src/test/java/org/springframework/samples/petclinic/medication/MedicationUuidIntegrationTests.java b/src/test/java/org/springframework/samples/petclinic/medication/MedicationUuidIntegrationTests.java
+new file mode 100644
+index 00000000000..6214f8c0186
+--- /dev/null
++++ b/src/test/java/org/springframework/samples/petclinic/medication/MedicationUuidIntegrationTests.java
+@@ -0,0 +1,57 @@
++package org.springframework.samples.petclinic.medication;
++
++import static org.assertj.core.api.Assertions.assertThat;
++
++import java.util.Optional;
++import java.util.UUID;
++
++import org.junit.jupiter.api.Test;
++import org.springframework.beans.factory.annotation.Autowired;
++import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
++
++@DataJpaTest
++class MedicationUuidIntegrationTests {
++
++	@Autowired
++	private MedicationRepository medications;
++
++	@Test
++	void shouldGenerateUuidOnSaveAndRetrieveById() {
++		Medication m = new Medication();
++		m.setName("Aspirin");
++
++		Medication saved = medications.save(m);
++		assertThat(saved.getId()).as("UUID should be generated on save").isNotNull();
++
++		UUID id = saved.getId();
++		Optional<Medication> found = medications.findById(id);
++		assertThat(found).isPresent();
++		assertThat(found.get().getId()).isEqualTo(id);
++		assertThat(found.get().getName()).isEqualTo("Aspirin");
++
++		// UUID string format check (36 chars with hyphens)
++		assertThat(id.toString()).hasSize(36);
++		assertThat(id.toString()).contains("-");
++	}
++
++	@Test
++	void eachEntityShouldHaveUniqueUuid() {
++		Medication m1 = new Medication();
++		m1.setName("Ibuprofen");
++		Medication m2 = new Medication();
++		m2.setName("Paracetamol");
++		Medication m3 = new Medication();
++		m3.setName("Paracetamol");
++
++		Medication s1 = medications.save(m1);
++		Medication s2 = medications.save(m2);
++		Medication s3 = medications.save(m3);
++
++		assertThat(s1.getId()).isNotNull();
++		assertThat(s2.getId()).isNotNull();
++		assertThat(s3.getId()).isNotNull();
++		assertThat(s1.getId()).isNotEqualTo(s2.getId());
++		assertThat(s1.getId()).isNotEqualTo(s3.getId());
++		assertThat(s2.getId()).isNotEqualTo(s3.getId());
++	}
++}

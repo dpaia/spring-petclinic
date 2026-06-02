@@ -62,4 +62,6 @@ public interface OwnerRepository extends JpaRepository<Owner, Integer> {
 	 */
 	Optional<Owner> findById(@Nonnull Integer id);
 
+	List<Owner> findAllByAddressCity(@Nonnull String city);
+
 }

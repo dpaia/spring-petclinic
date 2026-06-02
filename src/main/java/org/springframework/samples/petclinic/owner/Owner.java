@@ -18,18 +18,11 @@ package org.springframework.samples.petclinic.owner;
 import java.util.ArrayList;
 import java.util.List;
 
+import jakarta.persistence.*;
 import org.springframework.core.style.ToStringCreator;
 import org.springframework.samples.petclinic.model.Person;
 import org.springframework.util.Assert;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.OrderBy;
-import jakarta.persistence.Table;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.NotBlank;
 
@@ -47,13 +40,8 @@ import jakarta.validation.constraints.NotBlank;
 @Table(name = "owners")
 public class Owner extends Person {
 
-	@Column(name = "address")
-	@NotBlank
-	private String address;
-
-	@Column(name = "city")
-	@NotBlank
-	private String city;
+	@Embedded
+	private Address address;
 
 	@Column(name = "telephone")
 	@NotBlank
@@ -65,20 +53,12 @@ public class Owner extends Person {
 	@OrderBy("name")
 	private final List<Pet> pets = new ArrayList<>();
 
-	public String getAddress() {
+	public Address getAddress() {
 		return this.address;
 	}
 
-	public void setAddress(String address) {
+	public void setAddress(Address address) {
 		this.address = address;
-	}
-
-	public String getCity() {
-		return this.city;
-	}
-
-	public void setCity(String city) {
-		this.city = city;
 	}
 
 	public String getTelephone() {
@@ -149,8 +129,7 @@ public class Owner extends Person {
 			.append("new", this.isNew())
 			.append("lastName", this.getLastName())
 			.append("firstName", this.getFirstName())
-			.append("address", this.address)
-			.append("city", this.city)
+			.append("address", this.address.toString())
 			.append("telephone", this.telephone)
 			.toString();
 	}

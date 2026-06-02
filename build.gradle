@@ -49,7 +49,9 @@ dependencies {
   runtimeOnly "org.webjars.npm:font-awesome:${webjarsFontawesomeVersion}"
   runtimeOnly 'com.github.ben-manes.caffeine:caffeine'
   runtimeOnly 'com.mysql:mysql-connector-j'
+  runtimeOnly 'io.asyncer:r2dbc-mysql'
   runtimeOnly 'org.postgresql:postgresql'
+  runtimeOnly 'org.postgresql:r2dbc-postgresql'
   developmentOnly 'org.springframework.boot:spring-boot-devtools'
   testImplementation 'org.springframework.boot:spring-boot-starter-test'
   testImplementation 'org.springframework.boot:spring-boot-testcontainers'

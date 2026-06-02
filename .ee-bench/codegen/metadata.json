@@ -5,7 +5,7 @@
   "jvm_version": "17",
   "expected": {
     "fail_to_pass": [
-      "org.springframework.samples.petclinic.owner.VisitDtoSubmissionTest"
+      "org.springframework.samples.petclinic.owner.VisitDtoSubmissionTest.testSuccessfultSubmission"
     ],
     "pass_to_pass": []
   },

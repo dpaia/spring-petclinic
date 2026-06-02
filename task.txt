@@ -1,0 +1,42 @@
+## Task Breakdown
+
+### Overview
+This scenario focuses on handling reflection in GraalVM native images by creating custom reflection configuration files. Reflection is a powerful Java feature that allows code to inspect and manipulate classes, methods, and fields at runtime, but it requires special configuration in GraalVM native images since the default behavior is to remove unused code during ahead-of-time compilation.
+
+### Task Instructions
+Implement a utility class that demonstrates reflection usage and configure it properly for GraalVM native images. The implementation should show how reflection fails in native images without proper configuration and how to fix it by creating a reflect-config.json file. Focus on making the reflection-based functionality work correctly in both JVM and native image modes.
+
+### Implementation Tasks
+
+1. **Create a reflection-based utility class**
+   - Create EntityReflectionUtil class in the util package
+   - Implement methods for loading classes dynamically using Class.forName()
+   - Add methods for creating instances using reflection
+   - Implement methods for inspecting class structure (methods, fields)
+   - Add methods for getting and setting properties using reflection
+
+2. **Create tests for the reflection functionality**
+   - Create EntityReflectionUtilTests class
+   - Implement tests for all reflection operations
+   - Add appropriate annotations to demonstrate native image issues
+   - Ensure tests pass in JVM mode
+
+3. **Create GraalVM reflection configuration**
+   - Create META-INF/native-image directory in resources
+   - Create reflect-config.json file with proper configuration
+   - Configure entity classes (BaseEntity, Person, etc.)
+   - Configure reflection classes and methods
+
+4. **Verify the implementation**
+   - Run tests in JVM mode to ensure they pass
+   - Build a native image to verify reflection works with configuration
+   - Document any issues or edge cases encountered
+
+5. **Challenge Variation: Automated Configuration Generation**
+   - Implemented automated configuration generation using native-image-agent
+   - Created generate-reflection-config.sh script to demonstrate the process
+   - The script runs the application with native-image-agent to trace reflection usage
+   - It executes tests to exercise reflection code paths
+   - Generated configuration files are copied to META-INF/native-image directory
+   - This approach eliminates the need to manually write reflection configuration
+   - Usage: ./generate-reflection-config.sh (requires GraalVM installation)

@@ -16,11 +16,11 @@
 package org.springframework.samples.petclinic.owner;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.samples.petclinic.owner.views.OwnerIdView;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -97,21 +97,22 @@ class OwnerController {
 			owner.setLastName(""); // empty string signifies broadest possible search
 		}
 
-		// find owners by last name
-		Page<Owner> ownersResults = findPaginatedForOwnersLastName(page, owner.getLastName());
-		if (ownersResults.isEmpty()) {
+		// first perform a lightweight search without fetching pets/visits
+		Page<OwnerIdView> ownersSummary = findPaginatedIdForOwnersLastName(page, owner.getLastName());
+		if (ownersSummary.isEmpty()) {
 			// no owners found
 			result.rejectValue("lastName", "notFound", "not found");
 			return "owners/findOwners";
 		}
 
-		if (ownersResults.getTotalElements() == 1) {
-			// 1 owner found
-			owner = ownersResults.iterator().next();
-			return "redirect:/owners/" + owner.getId();
+		if (ownersSummary.getTotalElements() == 1) {
+			// 1 owner found - redirect directly
+			OwnerIdView only = ownersSummary.iterator().next();
+			return "redirect:/owners/" + only.id();
 		}
 
-		// multiple owners found
+		// multiple owners found - now fetch full entities to display in a table
+		Page<Owner> ownersResults = findPaginatedForOwnersLastName(page, owner.getLastName());
 		return addPaginationModel(page, model, ownersResults);
 	}
 
@@ -128,6 +129,12 @@ class OwnerController {
 		int pageSize = 5;
 		Pageable pageable = PageRequest.of(page - 1, pageSize);
 		return owners.findByLastNameStartingWith(lastname, pageable);
+	}
+
+	private Page<OwnerIdView> findPaginatedIdForOwnersLastName(int page, String lastname) {
+		int pageSize = 5;
+		Pageable pageable = PageRequest.of(page - 1, pageSize);
+		return owners.findIdByLastNameStartingWith(lastname, pageable);
 	}
 
 	@GetMapping("/owners/{ownerId}/edit")
@@ -157,15 +164,11 @@ class OwnerController {
 
 	/**
 	 * Custom handler for displaying an owner.
-	 * @param ownerId the ID of the owner to display
 	 * @return a ModelMap with the model attributes for the view
 	 */
 	@GetMapping("/owners/{ownerId}")
-	public ModelAndView showOwner(@PathVariable("ownerId") int ownerId) {
+	public ModelAndView showOwner(@ModelAttribute("owner") Owner owner) {
 		ModelAndView mav = new ModelAndView("owners/ownerDetails");
-		Optional<Owner> optionalOwner = this.owners.findById(ownerId);
-		Owner owner = optionalOwner.orElseThrow(() -> new IllegalArgumentException(
-				"Owner not found with id: " + ownerId + ". Please ensure the ID is correct "));
 		mav.addObject(owner);
 		return mav;
 	}

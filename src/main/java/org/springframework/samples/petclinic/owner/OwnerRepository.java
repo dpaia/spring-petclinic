@@ -15,7 +15,6 @@
  */
 package org.springframework.samples.petclinic.owner;
 
-import java.util.List;
 import java.util.Optional;
 
 import jakarta.annotation.Nonnull;
@@ -23,6 +22,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.samples.petclinic.owner.views.OwnerIdView;
 
 /**
  * Repository class for <code>Owner</code> domain objects. All method names are compliant
@@ -46,6 +46,14 @@ public interface OwnerRepository extends JpaRepository<Owner, Integer> {
 	 * found)
 	 */
 	Page<Owner> findByLastNameStartingWith(String lastName, Pageable pageable);
+
+	/**
+	 * Lightweight projection for searching owners without fetching pets/visits.
+	 */
+	@Query(value = "select new org.springframework.samples.petclinic.owner.views.OwnerIdView(o.id)\n" +
+		"from Owner o where o.lastName like concat(:lastName, '%')",
+		countQuery = "select count(o) from Owner o where o.lastName like concat(:lastName, '%')")
+	Page<OwnerIdView> findIdByLastNameStartingWith(String lastName, Pageable pageable);
 
 	/**
 	 * Retrieve an {@link Owner} from the data store by id.

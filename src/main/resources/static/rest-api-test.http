@@ -1,0 +1,126 @@
+# REST API Test File
+# This file contains HTTP requests to test the REST API endpoints
+# You can use tools like IntelliJ IDEA's HTTP Client, Postman, or curl to execute these requests
+
+### Pet Endpoints
+
+# Get all pets
+GET http://localhost:8080/api/pets
+
+###
+# Get a specific pet by ID
+GET http://localhost:8080/api/pets/1
+
+###
+# Get all pets for a specific owner
+GET http://localhost:8080/api/owners/1/pets
+
+###
+# Add a new pet to an owner
+POST http://localhost:8080/api/owners/1/pets
+Content-Type: application/json
+
+{
+  "name": "Fluffy",
+  "birthDate": "2023-01-15",
+  "type": {
+    "id": 1
+  }
+}
+
+###
+# Update an existing pet
+PUT http://localhost:8080/api/pets/1
+Content-Type: application/json
+
+{
+  "name": "Leo Updated",
+  "birthDate": "2020-09-07",
+  "type": {
+    "id": 1
+  }
+}
+
+###
+# Delete a pet
+DELETE http://localhost:8080/api/pets/13
+
+### Owner Endpoints
+
+# Get all owners
+GET http://localhost:8080/api/owners
+
+###
+# Search owners by last name
+GET http://localhost:8080/api/owners?lastName=Davis
+
+###
+# Get a specific owner by ID
+GET http://localhost:8080/api/owners/1
+
+###
+# Create a new owner
+POST http://localhost:8080/api/owners
+Content-Type: application/json
+
+{
+  "firstName": "John",
+  "lastName": "Doe",
+  "address": "123 Main St",
+  "city": "Anytown",
+  "telephone": "1234567890"
+}
+
+###
+# Update an existing owner
+PUT http://localhost:8080/api/owners/1
+Content-Type: application/json
+
+{
+  "firstName": "George",
+  "lastName": "Franklin",
+  "address": "110 W. Liberty St",
+  "city": "Madison",
+  "telephone": "6085551023"
+}
+
+###
+# Delete an owner
+DELETE http://localhost:8080/api/owners/11
+
+### Visit Endpoints
+
+# Get all visits
+GET http://localhost:8080/api/visits
+
+###
+# Get a specific visit by ID
+GET http://localhost:8080/api/visits/1
+
+###
+# Get all visits for a specific pet
+GET http://localhost:8080/api/pets/7/visits
+
+###
+# Add a new visit to a pet
+POST http://localhost:8080/api/pets/7/visits
+Content-Type: application/json
+
+{
+  "date": "2025-07-14",
+  "description": "Annual checkup"
+}
+
+###
+# Update an existing visit
+PUT http://localhost:8080/api/visits/1
+Content-Type: application/json
+
+{
+  "date": "2023-01-02",
+  "description": "rabies shot updated"
+}
+
+###
+# Delete a visit
+DELETE http://localhost:8080/api/visits/4

@@ -41,9 +41,7 @@ import java.util.regex.Pattern;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-@TestPropertySource(properties = {
-	"spring.jpa.show-sql=true",
-})
+@TestPropertySource(properties = { "spring.jpa.show-sql=true", })
 @ExtendWith(OutputCaptureExtension.class)
 public class PetClinicIntegrationDatabaseTests {
 
@@ -55,7 +53,6 @@ public class PetClinicIntegrationDatabaseTests {
 
 	@Autowired
 	private RestTemplateBuilder builder;
-
 
 	@Test
 	void testOwnerDetails(CapturedOutput output) {
@@ -73,7 +70,9 @@ public class PetClinicIntegrationDatabaseTests {
 	private Long countSelects(CapturedOutput output) {
 		Matcher m = Pattern.compile("select").matcher(output.getAll());
 		Long count = 0L;
-		while (m.find()) count++;
+		while (m.find())
+			count++;
 		return count;
 	}
+
 }

@@ -4,7 +4,12 @@
   "language": "java",
   "jvm_version": "17",
   "expected": {
-    "fail_to_pass": [],
+    "fail_to_pass": [
+      "org.springframework.samples.petclinic.owner.R2dbcOwnerRepositoryTests",
+      "org.springframework.samples.petclinic.owner.R2dbcPetRepositoryTests",
+      "org.springframework.samples.petclinic.owner.R2dbcVisitRepositoryTests",
+      "org.springframework.samples.petclinic.vet.R2dbcVetRepositoryTests"
+    ],
     "pass_to_pass": []
   },
   "environment": {

@@ -22,8 +22,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledInNativeImage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.aot.DisabledInAotMode;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -34,6 +37,7 @@ import java.time.LocalDate;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
@@ -48,6 +52,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 @WebMvcTest(value = PetController.class,
 		includeFilters = @ComponentScan.Filter(value = PetTypeFormatter.class, type = FilterType.ASSIGNABLE_TYPE))
+@Import(PetControllerTests.PetTypeRepositoryTestConfig.class)
 @DisabledInNativeImage
 @DisabledInAotMode
 class PetControllerTests {
@@ -62,15 +67,12 @@ class PetControllerTests {
 	@MockitoBean
 	private OwnerRepository owners;
 
-	@MockitoBean
+	@Autowired
 	private PetTypeRepository types;
 
 	@BeforeEach
 	void setup() {
-		PetType cat = new PetType();
-		cat.setId(3);
-		cat.setName("hamster");
-		given(this.types.findAllByOrderByName()).willReturn(Flux.just(cat));
+		given(this.types.findAllByOrderByName()).willReturn(Flux.just(hamster()));
 
 		Owner owner = new Owner();
 		Pet pet = new Pet();
@@ -82,6 +84,13 @@ class PetControllerTests {
 		pet.setName("petty");
 		dog.setName("doggy");
 		given(this.owners.findById(TEST_OWNER_ID)).willReturn(Mono.just(owner));
+	}
+
+	private static PetType hamster() {
+		PetType hamster = new PetType();
+		hamster.setId(3);
+		hamster.setName("hamster");
+		return hamster;
 	}
 
 	@Test
@@ -213,6 +222,18 @@ class PetControllerTests {
 				.andExpect(model().attributeHasFieldErrors("pet", "name"))
 				.andExpect(model().attributeHasFieldErrorCode("pet", "name", "required"))
 				.andExpect(view().name("pets/createOrUpdatePetForm"));
+		}
+
+	}
+
+	@TestConfiguration
+	static class PetTypeRepositoryTestConfig {
+
+		@Bean
+		PetTypeRepository types() {
+			PetTypeRepository types = mock(PetTypeRepository.class);
+			given(types.findAllByOrderByName()).willReturn(Flux.just(hamster()));
+			return types;
 		}
 
 	}

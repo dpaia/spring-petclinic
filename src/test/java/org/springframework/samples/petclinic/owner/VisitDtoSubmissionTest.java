@@ -26,6 +26,7 @@ class VisitDtoSubmissionTest {
 	private TestRestTemplate rest;
 
 	private static final int OWNER_ID = 1;
+
 	private static final int PET_ID = 1;
 
 	@Test
@@ -39,13 +40,11 @@ class VisitDtoSubmissionTest {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
-		ResponseEntity<String> response = rest.postForEntity(
-			"/owners/" + OWNER_ID + "/pets/" + PET_ID + "/visits/new",
-			new HttpEntity<>(form, headers),
-			String.class
-		);
+		ResponseEntity<String> response = rest.postForEntity("/owners/" + OWNER_ID + "/pets/" + PET_ID + "/visits/new",
+				new HttpEntity<>(form, headers), String.class);
 
-		// TestRestTemplate follows redirects by default, so we should land on owner page (200 OK)
+		// TestRestTemplate follows redirects by default, so we should land on owner page
+		// (200 OK)
 		assertThat(response.getStatusCode().is2xxSuccessful()).isTrue();
 		assertThat(response.getBody()).isNotNull();
 		// The owner details page should contain the description we just submitted
@@ -62,16 +61,14 @@ class VisitDtoSubmissionTest {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
-		ResponseEntity<String> response = rest.postForEntity(
-			"/owners/" + OWNER_ID + "/pets/" + PET_ID + "/visits/new",
-			new HttpEntity<>(form, headers),
-			String.class
-		);
+		ResponseEntity<String> response = rest.postForEntity("/owners/" + OWNER_ID + "/pets/" + PET_ID + "/visits/new",
+				new HttpEntity<>(form, headers), String.class);
 
 		// Expect no redirect; the form should be returned with validation error
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 		assertThat(response.getBody()).isNotNull();
-		// The generic 'Error' label is shown when a field has errors (from fragments/inputField.html)
+		// The generic 'Error' label is shown when a field has errors (from
+		// fragments/inputField.html)
 		assertThat(response.getBody()).contains("Error");
 		// The form title should be present as well
 		assertThat(response.getBody()).contains("New", "Visit");
@@ -87,17 +84,16 @@ class VisitDtoSubmissionTest {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
-		ResponseEntity<String> response = rest.postForEntity(
-			"/owners/" + OWNER_ID + "/pets/" + PET_ID + "/visits/new",
-			new HttpEntity<>(form, headers),
-			String.class
-		);
+		ResponseEntity<String> response = rest.postForEntity("/owners/" + OWNER_ID + "/pets/" + PET_ID + "/visits/new",
+				new HttpEntity<>(form, headers), String.class);
 
 		// Expect re-rendered form with validation error for date binding
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 		assertThat(response.getBody()).isNotNull();
 		assertThat(response.getBody()).contains("Error");
-		// In case the model attribute is missing due to binding failure, the "New" prefix may be omitted
+		// In case the model attribute is missing due to binding failure, the "New" prefix
+		// may be omitted
 		assertThat(response.getBody()).contains("Visit");
 	}
+
 }

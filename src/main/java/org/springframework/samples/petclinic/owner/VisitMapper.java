@@ -1,12 +1,9 @@
 package org.springframework.samples.petclinic.owner;
 
 public class VisitMapper {
+
 	public static VisitDto toDto(Visit visit) {
-		return new VisitDto(
-			visit.getId(),
-			visit.getDate(),
-			visit.getDescription()
-		);
+		return new VisitDto(visit.getId(), visit.getDate(), visit.getDescription());
 	}
 
 	public static Visit toVisit(VisitDto visitDto) {
@@ -18,4 +15,5 @@ public class VisitMapper {
 		}
 		return visit;
 	}
+
 }

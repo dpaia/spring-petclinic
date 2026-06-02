@@ -57,11 +57,8 @@ class VisitController {
 	}
 
 	@ModelAttribute
-	public void loadOwnerAndPet(
-		@PathVariable("ownerId") int ownerId,
-		@PathVariable("petId") int petId,
-		Map<String, Object> model
-	) {
+	public void loadOwnerAndPet(@PathVariable("ownerId") int ownerId, @PathVariable("petId") int petId,
+			Map<String, Object> model) {
 		Optional<Owner> optionalOwner = owners.findById(ownerId);
 		Owner owner = optionalOwner.orElseThrow(() -> new IllegalArgumentException(
 				"Owner not found with id: " + ownerId + ". Please ensure the ID is correct "));
@@ -79,14 +76,9 @@ class VisitController {
 	}
 
 	@PostMapping("/owners/{ownerId}/pets/{petId}/visits/new")
-	public String processNewVisitForm(
-		@ModelAttribute Owner owner,
-		@PathVariable int petId,
-		@Valid
-		@ModelAttribute("visit") VisitDto visitDto,
-		BindingResult result,
-		RedirectAttributes redirectAttributes
-	) {
+	public String processNewVisitForm(@ModelAttribute Owner owner, @PathVariable int petId,
+			@Valid @ModelAttribute("visit") VisitDto visitDto, BindingResult result,
+			RedirectAttributes redirectAttributes) {
 		if (result.hasErrors()) {
 			return "pets/createOrUpdateVisitForm";
 		}

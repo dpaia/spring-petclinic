@@ -91,7 +91,7 @@ class PetRestControllerTests {
 		given(this.petRepository.findAll(any(Pageable.class))).willReturn(petsPage);
 
 		// when
-		mockMvc.perform(get("/api/pets"))
+		mockMvc.perform(get("/api/v1/pets"))
 			// then
 			.andExpect(status().isOk())
 			.andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -105,7 +105,7 @@ class PetRestControllerTests {
 			.andExpect(jsonPath("$.totalElements", is(2)));
 
 		// Test with custom page and size parameters
-		mockMvc.perform(get("/api/pets?page=2&size=5"))
+		mockMvc.perform(get("/api/v1/pets?page=2&size=5"))
 			.andExpect(status().isOk())
 			.andExpect(content().contentType(MediaType.APPLICATION_JSON))
 			.andExpect(jsonPath("$.content", hasSize(2)));
@@ -129,7 +129,7 @@ class PetRestControllerTests {
 		given(this.petRepository.findById(1)).willReturn(Optional.of(pet));
 
 		// when
-		mockMvc.perform(get("/api/pets/1"))
+		mockMvc.perform(get("/api/v1/pets/1"))
 			// then
 			.andExpect(status().isOk())
 			.andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -146,7 +146,7 @@ class PetRestControllerTests {
 		given(this.petRepository.findById(999)).willReturn(Optional.empty());
 
 		// when
-		mockMvc.perform(get("/api/pets/999"))
+		mockMvc.perform(get("/api/v1/pets/999"))
 			// then
 			.andExpect(status().isNotFound());
 	}
@@ -176,7 +176,7 @@ class PetRestControllerTests {
 		given(this.petRepository.findByOwnerId(eq(1), any(Pageable.class))).willReturn(petsPage);
 
 		// when
-		mockMvc.perform(get("/api/owners/1/pets"))
+		mockMvc.perform(get("/api/v1/owners/1/pets"))
 			// then
 			.andExpect(status().isOk())
 			.andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -190,7 +190,7 @@ class PetRestControllerTests {
 			.andExpect(jsonPath("$.totalElements", is(2)));
 
 		// Test with custom page and size parameters
-		mockMvc.perform(get("/api/owners/1/pets?page=2&size=5"))
+		mockMvc.perform(get("/api/v1/owners/1/pets?page=2&size=5"))
 			.andExpect(status().isOk())
 			.andExpect(content().contentType(MediaType.APPLICATION_JSON))
 			.andExpect(jsonPath("$.content", hasSize(2)));
@@ -204,7 +204,7 @@ class PetRestControllerTests {
 		given(this.ownerRepository.existsById(999)).willReturn(false);
 
 		// when
-		mockMvc.perform(get("/api/owners/999/pets"))
+		mockMvc.perform(get("/api/v1/owners/999/pets"))
 			// then
 			.andExpect(status().isNotFound());
 	}
@@ -236,11 +236,11 @@ class PetRestControllerTests {
 
 		// when
 		mockMvc
-			.perform(post("/api/owners/1/pets").contentType(MediaType.APPLICATION_JSON)
+			.perform(post("/api/v1/owners/1/pets").contentType(MediaType.APPLICATION_JSON)
 				.content("{\"name\":\"Leo\",\"birthDate\":\"2020-09-07\",\"type\":{\"id\":1}}"))
 			// then
 			.andExpect(status().isCreated())
-			.andExpect(header().string("Location", containsString("/api/owners/1/pets/1")))
+			.andExpect(header().string("Location", containsString("/api/v1/owners/1/pets/1")))
 			.andExpect(jsonPath("$.name", is("Leo")))
 			.andExpect(jsonPath("$.birthDate", is("2020-09-07")))
 			.andExpect(jsonPath("$.type.id", is(1)));
@@ -255,7 +255,7 @@ class PetRestControllerTests {
 
 		// when
 		mockMvc
-			.perform(post("/api/owners/999/pets").contentType(MediaType.APPLICATION_JSON)
+			.perform(post("/api/v1/owners/999/pets").contentType(MediaType.APPLICATION_JSON)
 				.content("{\"name\":\"Leo\",\"birthDate\":\"2020-09-07\",\"type\":{\"id\":1}}"))
 			// then
 			.andExpect(status().isNotFound());
@@ -275,7 +275,7 @@ class PetRestControllerTests {
 
 		// when
 		mockMvc
-			.perform(post("/api/owners/1/pets").contentType(MediaType.APPLICATION_JSON)
+			.perform(post("/api/v1/owners/1/pets").contentType(MediaType.APPLICATION_JSON)
 				.content("{\"name\":\"\",\"birthDate\":\"2020-09-07\",\"type\":{\"id\":1}}"))
 			// then
 			.andExpect(status().isBadRequest());
@@ -311,7 +311,7 @@ class PetRestControllerTests {
 
 		// when
 		mockMvc
-			.perform(post("/api/owners/1/pets").contentType(MediaType.APPLICATION_JSON)
+			.perform(post("/api/v1/owners/1/pets").contentType(MediaType.APPLICATION_JSON)
 				.content("{\"name\":\"Leo\",\"birthDate\":\"2020-09-07\",\"type\":{\"id\":1}}"))
 			// then
 			.andExpect(status().isConflict());
@@ -366,7 +366,7 @@ class PetRestControllerTests {
 
 		// when
 		mockMvc
-			.perform(put("/api/pets/1").contentType(MediaType.APPLICATION_JSON)
+			.perform(put("/api/v1/pets/1").contentType(MediaType.APPLICATION_JSON)
 				.content("{\"name\":\"Leo Updated\",\"birthDate\":\"2020-09-07\",\"type\":{\"id\":1}}"))
 			// then
 			.andExpect(status().isOk())
@@ -385,7 +385,7 @@ class PetRestControllerTests {
 
 		// when
 		mockMvc
-			.perform(put("/api/pets/999").contentType(MediaType.APPLICATION_JSON)
+			.perform(put("/api/v1/pets/999").contentType(MediaType.APPLICATION_JSON)
 				.content("{\"name\":\"Leo Updated\",\"birthDate\":\"2020-09-07\",\"type\":{\"id\":1}}"))
 			// then
 			.andExpect(status().isNotFound());
@@ -444,7 +444,7 @@ class PetRestControllerTests {
 
 		// when
 		mockMvc
-			.perform(put("/api/pets/1").contentType(MediaType.APPLICATION_JSON)
+			.perform(put("/api/v1/pets/1").contentType(MediaType.APPLICATION_JSON)
 				.content("{\"name\":\"Basil\",\"birthDate\":\"2020-09-07\",\"type\":{\"id\":1}}"))
 			// then
 			.andExpect(status().isConflict());
@@ -495,7 +495,7 @@ class PetRestControllerTests {
 		given(this.ownerRepository.save(any(Owner.class))).willReturn(owner);
 
 		// when
-		mockMvc.perform(delete("/api/pets/1"))
+		mockMvc.perform(delete("/api/v1/pets/1"))
 			// then
 			.andExpect(status().isNoContent());
 
@@ -509,7 +509,7 @@ class PetRestControllerTests {
 		given(this.petRepository.existsById(999)).willReturn(false);
 
 		// when
-		mockMvc.perform(delete("/api/pets/999"))
+		mockMvc.perform(delete("/api/v1/pets/999"))
 			// then
 			.andExpect(status().isNotFound());
 

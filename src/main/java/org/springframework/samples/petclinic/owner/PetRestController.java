@@ -43,7 +43,7 @@ import jakarta.validation.Valid;
  * @author Junie
  */
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/v1")
 public class PetRestController {
 
 	private final PetRepository petRepository;

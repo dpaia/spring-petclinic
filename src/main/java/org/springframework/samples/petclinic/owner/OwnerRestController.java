@@ -41,7 +41,7 @@ import jakarta.validation.Valid;
  * @author Junie
  */
 @RestController
-@RequestMapping("/api/owners")
+@RequestMapping("/api/v1/owners")
 public class OwnerRestController {
 
 	private final OwnerRepository ownerRepository;

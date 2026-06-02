@@ -42,7 +42,7 @@ import jakarta.validation.Valid;
  * @author Junie
  */
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/v1")
 public class VisitRestController {
 
 	private final VisitRepository visitRepository;

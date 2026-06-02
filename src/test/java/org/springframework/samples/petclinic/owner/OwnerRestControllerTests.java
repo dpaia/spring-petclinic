@@ -84,7 +84,7 @@ class OwnerRestControllerTests {
 		given(this.ownerRepository.findAll(any(Pageable.class))).willReturn(ownersPage);
 
 		// when
-		mockMvc.perform(get("/api/owners"))
+		mockMvc.perform(get("/api/v1/owners"))
 			// then
 			.andExpect(status().isOk())
 			.andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -114,7 +114,7 @@ class OwnerRestControllerTests {
 		given(this.ownerRepository.findByLastNameStartingWith(eq("Davis"), any(Pageable.class))).willReturn(ownersPage);
 
 		// when
-		mockMvc.perform(get("/api/owners?lastName=Davis"))
+		mockMvc.perform(get("/api/v1/owners?lastName=Davis"))
 			// then
 			.andExpect(status().isOk())
 			.andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -138,7 +138,7 @@ class OwnerRestControllerTests {
 		given(this.ownerRepository.findById(1)).willReturn(Optional.of(owner));
 
 		// when
-		mockMvc.perform(get("/api/owners/1"))
+		mockMvc.perform(get("/api/v1/owners/1"))
 			// then
 			.andExpect(status().isOk())
 			.andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -156,7 +156,7 @@ class OwnerRestControllerTests {
 		given(this.ownerRepository.findById(999)).willReturn(Optional.empty());
 
 		// when
-		mockMvc.perform(get("/api/owners/999"))
+		mockMvc.perform(get("/api/v1/owners/999"))
 			// then
 			.andExpect(status().isNotFound());
 	}
@@ -178,12 +178,12 @@ class OwnerRestControllerTests {
 		});
 
 		// when
-		mockMvc.perform(post("/api/owners").contentType(MediaType.APPLICATION_JSON)
+		mockMvc.perform(post("/api/v1/owners").contentType(MediaType.APPLICATION_JSON)
 			.content(
 					"{\"firstName\":\"John\",\"lastName\":\"Doe\",\"address\":\"123 Main St\",\"city\":\"Anytown\",\"telephone\":\"1234567890\"}"))
 			// then
 			.andExpect(status().isCreated())
-			.andExpect(header().string("Location", containsString("/api/owners/10")))
+			.andExpect(header().string("Location", containsString("/api/v1/owners/10")))
 			.andExpect(jsonPath("$.id", is(10)))
 			.andExpect(jsonPath("$.firstName", is("John")))
 			.andExpect(jsonPath("$.lastName", is("Doe")))
@@ -197,7 +197,7 @@ class OwnerRestControllerTests {
 	@Test
 	void testCreateOwnerWithId() throws Exception {
 		// when
-		mockMvc.perform(post("/api/owners").contentType(MediaType.APPLICATION_JSON)
+		mockMvc.perform(post("/api/v1/owners").contentType(MediaType.APPLICATION_JSON)
 			.content(
 					"{\"id\":1,\"firstName\":\"John\",\"lastName\":\"Doe\",\"address\":\"123 Main St\",\"city\":\"Anytown\",\"telephone\":\"1234567890\"}"))
 			// then
@@ -209,7 +209,8 @@ class OwnerRestControllerTests {
 	@Test
 	void testCreateOwnerInvalidData() throws Exception {
 		// when - missing required fields
-		mockMvc.perform(post("/api/owners").contentType(MediaType.APPLICATION_JSON).content("{\"firstName\":\"John\"}"))
+		mockMvc
+			.perform(post("/api/v1/owners").contentType(MediaType.APPLICATION_JSON).content("{\"firstName\":\"John\"}"))
 			// then
 			.andExpect(status().isBadRequest());
 
@@ -231,7 +232,7 @@ class OwnerRestControllerTests {
 		given(this.ownerRepository.save(any(Owner.class))).willAnswer(invocation -> invocation.getArgument(0));
 
 		// when
-		mockMvc.perform(put("/api/owners/1").contentType(MediaType.APPLICATION_JSON)
+		mockMvc.perform(put("/api/v1/owners/1").contentType(MediaType.APPLICATION_JSON)
 			.content(
 					"{\"firstName\":\"George Updated\",\"lastName\":\"Franklin\",\"address\":\"110 W. Liberty St.\",\"city\":\"Madison\",\"telephone\":\"6085551023\"}"))
 			// then
@@ -252,7 +253,7 @@ class OwnerRestControllerTests {
 		given(this.ownerRepository.findById(999)).willReturn(Optional.empty());
 
 		// when
-		mockMvc.perform(put("/api/owners/999").contentType(MediaType.APPLICATION_JSON)
+		mockMvc.perform(put("/api/v1/owners/999").contentType(MediaType.APPLICATION_JSON)
 			.content(
 					"{\"firstName\":\"George Updated\",\"lastName\":\"Franklin\",\"address\":\"110 W. Liberty St.\",\"city\":\"Madison\",\"telephone\":\"6085551023\"}"))
 			// then
@@ -275,7 +276,7 @@ class OwnerRestControllerTests {
 		given(this.ownerRepository.findById(1)).willReturn(Optional.of(existingOwner));
 
 		// when
-		mockMvc.perform(put("/api/owners/1").contentType(MediaType.APPLICATION_JSON)
+		mockMvc.perform(put("/api/v1/owners/1").contentType(MediaType.APPLICATION_JSON)
 			.content(
 					"{\"id\":2,\"firstName\":\"George Updated\",\"lastName\":\"Franklin\",\"address\":\"110 W. Liberty St.\",\"city\":\"Madison\",\"telephone\":\"6085551023\"}"))
 			// then
@@ -290,7 +291,7 @@ class OwnerRestControllerTests {
 		given(this.ownerRepository.existsById(1)).willReturn(true);
 
 		// when
-		mockMvc.perform(delete("/api/owners/1"))
+		mockMvc.perform(delete("/api/v1/owners/1"))
 			// then
 			.andExpect(status().isNoContent());
 
@@ -303,7 +304,7 @@ class OwnerRestControllerTests {
 		given(this.ownerRepository.existsById(999)).willReturn(false);
 
 		// when
-		mockMvc.perform(delete("/api/owners/999"))
+		mockMvc.perform(delete("/api/v1/owners/999"))
 			// then
 			.andExpect(status().isNotFound());
 

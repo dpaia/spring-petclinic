@@ -80,7 +80,7 @@ class VisitRestControllerTests {
 		given(this.visitRepository.findAll(any(Pageable.class))).willReturn(visitsPage);
 
 		// when
-		mockMvc.perform(get("/api/visits"))
+		mockMvc.perform(get("/api/v1/visits"))
 			// then
 			.andExpect(status().isOk())
 			.andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -96,7 +96,7 @@ class VisitRestControllerTests {
 			.andExpect(jsonPath("$.totalElements", is(2)));
 
 		// Test with custom page and size parameters
-		mockMvc.perform(get("/api/visits?page=2&size=5"))
+		mockMvc.perform(get("/api/v1/visits?page=2&size=5"))
 			.andExpect(status().isOk())
 			.andExpect(content().contentType(MediaType.APPLICATION_JSON))
 			.andExpect(jsonPath("$.content", hasSize(2)));
@@ -115,7 +115,7 @@ class VisitRestControllerTests {
 		given(this.visitRepository.findById(1)).willReturn(Optional.of(visit));
 
 		// when
-		mockMvc.perform(get("/api/visits/1"))
+		mockMvc.perform(get("/api/v1/visits/1"))
 			// then
 			.andExpect(status().isOk())
 			.andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -130,7 +130,7 @@ class VisitRestControllerTests {
 		given(this.visitRepository.findById(999)).willReturn(Optional.empty());
 
 		// when
-		mockMvc.perform(get("/api/visits/999"))
+		mockMvc.perform(get("/api/v1/visits/999"))
 			// then
 			.andExpect(status().isNotFound());
 	}
@@ -154,7 +154,7 @@ class VisitRestControllerTests {
 		given(this.visitRepository.findByPetId(eq(1), any(Pageable.class))).willReturn(visitsPage);
 
 		// when
-		mockMvc.perform(get("/api/pets/1/visits"))
+		mockMvc.perform(get("/api/v1/pets/1/visits"))
 			// then
 			.andExpect(status().isOk())
 			.andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -170,7 +170,7 @@ class VisitRestControllerTests {
 			.andExpect(jsonPath("$.totalElements", is(2)));
 
 		// Test with custom page and size parameters
-		mockMvc.perform(get("/api/pets/1/visits?page=2&size=5"))
+		mockMvc.perform(get("/api/v1/pets/1/visits?page=2&size=5"))
 			.andExpect(status().isOk())
 			.andExpect(content().contentType(MediaType.APPLICATION_JSON))
 			.andExpect(jsonPath("$.content", hasSize(2)));
@@ -184,7 +184,7 @@ class VisitRestControllerTests {
 		given(this.petRepository.existsById(999)).willReturn(false);
 
 		// when
-		mockMvc.perform(get("/api/pets/999/visits"))
+		mockMvc.perform(get("/api/v1/pets/999/visits"))
 			// then
 			.andExpect(status().isNotFound());
 	}
@@ -210,11 +210,11 @@ class VisitRestControllerTests {
 
 		// when
 		mockMvc
-			.perform(post("/api/pets/1/visits").contentType(MediaType.APPLICATION_JSON)
+			.perform(post("/api/v1/pets/1/visits").contentType(MediaType.APPLICATION_JSON)
 				.content("{\"date\":\"2023-03-10\",\"description\":\"Dental cleaning\"}"))
 			// then
 			.andExpect(status().isCreated())
-			.andExpect(header().string("Location", containsString("/api/pets/1/visits/5")))
+			.andExpect(header().string("Location", containsString("/api/v1/pets/1/visits/5")))
 			.andExpect(jsonPath("$.date", is("2023-03-10")))
 			.andExpect(jsonPath("$.description", is("Dental cleaning")));
 
@@ -228,7 +228,7 @@ class VisitRestControllerTests {
 
 		// when
 		mockMvc
-			.perform(post("/api/pets/999/visits").contentType(MediaType.APPLICATION_JSON)
+			.perform(post("/api/v1/pets/999/visits").contentType(MediaType.APPLICATION_JSON)
 				.content("{\"date\":\"2023-03-10\",\"description\":\"Dental cleaning\"}"))
 			// then
 			.andExpect(status().isNotFound());
@@ -247,7 +247,7 @@ class VisitRestControllerTests {
 
 		// when
 		mockMvc
-			.perform(post("/api/pets/1/visits").contentType(MediaType.APPLICATION_JSON)
+			.perform(post("/api/v1/pets/1/visits").contentType(MediaType.APPLICATION_JSON)
 				.content("{\"date\":\"2023-03-10\",\"description\":\"\"}"))
 			// then
 			.andExpect(status().isBadRequest());
@@ -268,7 +268,7 @@ class VisitRestControllerTests {
 
 		// when
 		mockMvc
-			.perform(put("/api/visits/1").contentType(MediaType.APPLICATION_JSON)
+			.perform(put("/api/v1/visits/1").contentType(MediaType.APPLICATION_JSON)
 				.content("{\"date\":\"2023-01-02\",\"description\":\"Annual checkup updated\"}"))
 			// then
 			.andExpect(status().isOk())
@@ -286,7 +286,7 @@ class VisitRestControllerTests {
 
 		// when
 		mockMvc
-			.perform(put("/api/visits/999").contentType(MediaType.APPLICATION_JSON)
+			.perform(put("/api/v1/visits/999").contentType(MediaType.APPLICATION_JSON)
 				.content("{\"date\":\"2023-01-02\",\"description\":\"Annual checkup updated\"}"))
 			// then
 			.andExpect(status().isNotFound());
@@ -300,7 +300,7 @@ class VisitRestControllerTests {
 		given(this.visitRepository.existsById(1)).willReturn(true);
 
 		// when
-		mockMvc.perform(delete("/api/visits/1"))
+		mockMvc.perform(delete("/api/v1/visits/1"))
 			// then
 			.andExpect(status().isNoContent());
 
@@ -313,7 +313,7 @@ class VisitRestControllerTests {
 		given(this.visitRepository.existsById(999)).willReturn(false);
 
 		// when
-		mockMvc.perform(delete("/api/visits/999"))
+		mockMvc.perform(delete("/api/v1/visits/999"))
 			// then
 			.andExpect(status().isNotFound());
 

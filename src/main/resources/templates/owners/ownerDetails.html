@@ -31,6 +31,10 @@
       <th th:text="#{telephone}">Telephone</th>
       <td th:text="*{telephone}"></td>
     </tr>
+    <tr>
+      <th>Email</th>
+      <td th:text="*{email}"></td>
+    </tr>
   </table>
 
   <a th:href="@{__${owner.id}__/edit}" class="btn btn-primary" th:text="#{editOwner}">Edit

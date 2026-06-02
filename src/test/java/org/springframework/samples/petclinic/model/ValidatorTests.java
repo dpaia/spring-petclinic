@@ -23,6 +23,7 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.samples.petclinic.owner.Owner;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
 import jakarta.validation.ConstraintViolation;
@@ -55,6 +56,43 @@ class ValidatorTests {
 		ConstraintViolation<Person> violation = constraintViolations.iterator().next();
 		assertThat(violation.getPropertyPath()).hasToString("firstName");
 		assertThat(violation.getMessage()).isEqualTo("must not be blank");
+	}
+
+	@Test
+	void shouldValidateWhenEmailFormatIsValid() {
+		LocaleContextHolder.setLocale(Locale.ENGLISH);
+		Owner owner = new Owner();
+		owner.setFirstName("John");
+		owner.setLastName("Doe");
+		owner.setAddress("123 Main St");
+		owner.setCity("New York");
+		owner.setTelephone("1234567890");
+		owner.setEmail("john.doe@example.com");
+
+		Validator validator = createValidator();
+		Set<ConstraintViolation<Owner>> constraintViolations = validator.validate(owner);
+
+		assertThat(constraintViolations).isEmpty();
+	}
+
+	@Test
+	void shouldNotValidateWhenEmailFormatIsInvalid() {
+		LocaleContextHolder.setLocale(Locale.ENGLISH);
+		Owner owner = new Owner();
+		owner.setFirstName("John");
+		owner.setLastName("Doe");
+		owner.setAddress("123 Main St");
+		owner.setCity("New York");
+		owner.setTelephone("1234567890");
+		owner.setEmail("invalid-email");
+
+		Validator validator = createValidator();
+		Set<ConstraintViolation<Owner>> constraintViolations = validator.validate(owner);
+
+		assertThat(constraintViolations).hasSize(1);
+		ConstraintViolation<Owner> violation = constraintViolations.iterator().next();
+		assertThat(violation.getPropertyPath()).hasToString("email");
+		assertThat(violation.getMessage()).isEqualTo("must be a well-formed email address");
 	}
 
 }

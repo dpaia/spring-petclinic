@@ -4,7 +4,10 @@
   "language": "java",
   "jvm_version": "17",
   "expected": {
-    "fail_to_pass": [],
+    "fail_to_pass": [
+      "org.springframework.samples.petclinic.owner.OwnerControllerTests",
+      "org.springframework.samples.petclinic.vet.VetControllerTests"
+    ],
     "pass_to_pass": []
   },
   "environment": {

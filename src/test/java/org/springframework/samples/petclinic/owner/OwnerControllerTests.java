@@ -144,10 +144,7 @@ class OwnerControllerTests {
 	@Test
 	void testProcessFindFormSuccess() throws Exception {
 		Owner george = george();
-		Page<OwnerIdView> summary = new PageImpl<>(List.of(
-				new OwnerIdView(george.getId()),
-				new OwnerIdView(2)
-		));
+		Page<OwnerIdView> summary = new PageImpl<>(List.of(new OwnerIdView(george.getId()), new OwnerIdView(2)));
 		when(this.owners.findIdByLastNameStartingWith(anyString(), any(Pageable.class))).thenReturn(summary);
 		Page<Owner> tasks = new PageImpl<>(List.of(george, new Owner()));
 		when(this.owners.findByLastNameStartingWith(anyString(), any(Pageable.class))).thenReturn(tasks);
@@ -157,9 +154,7 @@ class OwnerControllerTests {
 	@Test
 	void testProcessFindFormByLastName() throws Exception {
 		Owner g = george();
-		Page<OwnerIdView> summary = new PageImpl<>(List.of(
-				new OwnerIdView(g.getId())
-		));
+		Page<OwnerIdView> summary = new PageImpl<>(List.of(new OwnerIdView(g.getId())));
 		when(this.owners.findIdByLastNameStartingWith(eq("Franklin"), any(Pageable.class))).thenReturn(summary);
 		mockMvc.perform(get("/owners?page=1").param("lastName", "Franklin"))
 			.andExpect(status().is3xxRedirection())
@@ -169,7 +164,8 @@ class OwnerControllerTests {
 	@Test
 	void testProcessFindFormNoOwnersFound() throws Exception {
 		Page<OwnerIdView> emptySummary = new PageImpl<>(List.of());
-		when(this.owners.findIdByLastNameStartingWith(eq("Unknown Surname"), any(Pageable.class))).thenReturn(emptySummary);
+		when(this.owners.findIdByLastNameStartingWith(eq("Unknown Surname"), any(Pageable.class)))
+			.thenReturn(emptySummary);
 		mockMvc.perform(get("/owners?page=1").param("lastName", "Unknown Surname"))
 			.andExpect(status().isOk())
 			.andExpect(model().attributeHasFieldErrors("owner", "lastName"))

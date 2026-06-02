@@ -55,4 +55,5 @@ class OwnerSearchIntegrationTests {
 		verify(ownerRepository, times(1)).findIdByLastNameStartingWith(eq("Davis"), any(Pageable.class));
 		verify(ownerRepository, times(1)).findByLastNameStartingWith(eq("Davis"), any(Pageable.class));
 	}
+
 }

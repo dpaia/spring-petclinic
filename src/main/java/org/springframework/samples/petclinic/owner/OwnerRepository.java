@@ -50,9 +50,9 @@ public interface OwnerRepository extends JpaRepository<Owner, Integer> {
 	/**
 	 * Lightweight projection for searching owners without fetching pets/visits.
 	 */
-	@Query(value = "select new org.springframework.samples.petclinic.owner.views.OwnerIdView(o.id)\n" +
-		"from Owner o where o.lastName like concat(:lastName, '%')",
-		countQuery = "select count(o) from Owner o where o.lastName like concat(:lastName, '%')")
+	@Query(value = "select new org.springframework.samples.petclinic.owner.views.OwnerIdView(o.id)\n"
+			+ "from Owner o where o.lastName like concat(:lastName, '%')",
+			countQuery = "select count(o) from Owner o where o.lastName like concat(:lastName, '%')")
 	Page<OwnerIdView> findIdByLastNameStartingWith(String lastName, Pageable pageable);
 
 	/**

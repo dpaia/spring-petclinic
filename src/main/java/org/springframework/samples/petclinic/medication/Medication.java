@@ -10,6 +10,7 @@ import java.util.UUID;
 @Entity
 @Table(name = "medication")
 public class Medication {
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.UUID)
 	@JdbcTypeCode(SqlTypes.BINARY)

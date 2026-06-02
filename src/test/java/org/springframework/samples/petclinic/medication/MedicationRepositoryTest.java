@@ -26,4 +26,5 @@ public class MedicationRepositoryTest {
 		Optional<Medication> found = medicationRepository.findById(saved.getId());
 		assertTrue(found.isPresent());
 	}
+
 }

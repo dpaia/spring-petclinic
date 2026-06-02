@@ -17,12 +17,11 @@ package org.springframework.samples.petclinic.owner;
 
 import java.time.LocalDate;
 
+import jakarta.persistence.*;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.samples.petclinic.medicine.MedicalCondition;
 import org.springframework.samples.petclinic.model.BaseEntity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 
 /**
@@ -41,6 +40,19 @@ public class Visit extends BaseEntity {
 
 	@NotBlank
 	private String description;
+
+	@ManyToOne
+	@JoinColumns({ @JoinColumn(name = "medical_condition_code", referencedColumnName = "condition_code"),
+			@JoinColumn(name = "medical_condition_locale", referencedColumnName = "locale") })
+	private MedicalCondition medicalCondition;
+
+	public MedicalCondition getMedicalCondition() {
+		return medicalCondition;
+	}
+
+	public void setMedicalCondition(MedicalCondition medicalCondition) {
+		this.medicalCondition = medicalCondition;
+	}
 
 	/**
 	 * Creates a new instance of Visit for the current date

@@ -2,12 +2,20 @@ CREATE TABLE IF NOT EXISTS vets (
   id INT(4) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
   first_name VARCHAR(30),
   last_name VARCHAR(30),
+  created_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  last_modified_date TIMESTAMP NULL,
+  created_by VARCHAR(50) NOT NULL DEFAULT 'system',
+  last_modified_by VARCHAR(50),
   INDEX(last_name)
 ) engine=InnoDB;
 
 CREATE TABLE IF NOT EXISTS specialties (
   id INT(4) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
   name VARCHAR(80),
+  created_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  last_modified_date TIMESTAMP NULL,
+  created_by VARCHAR(50) NOT NULL DEFAULT 'system',
+  last_modified_by VARCHAR(50),
   INDEX(name)
 ) engine=InnoDB;
 
@@ -22,6 +30,10 @@ CREATE TABLE IF NOT EXISTS vet_specialties (
 CREATE TABLE IF NOT EXISTS types (
   id INT(4) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
   name VARCHAR(80),
+  created_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  last_modified_date TIMESTAMP NULL,
+  created_by VARCHAR(50) NOT NULL DEFAULT 'system',
+  last_modified_by VARCHAR(50),
   INDEX(name)
 ) engine=InnoDB;
 
@@ -32,6 +44,10 @@ CREATE TABLE IF NOT EXISTS owners (
   address VARCHAR(255),
   city VARCHAR(80),
   telephone VARCHAR(20),
+  created_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  last_modified_date TIMESTAMP NULL,
+  created_by VARCHAR(50) NOT NULL DEFAULT 'system',
+  last_modified_by VARCHAR(50),
   INDEX(last_name)
 ) engine=InnoDB;
 
@@ -41,6 +57,10 @@ CREATE TABLE IF NOT EXISTS pets (
   birth_date DATE,
   type_id INT(4) UNSIGNED NOT NULL,
   owner_id INT(4) UNSIGNED,
+  created_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  last_modified_date TIMESTAMP NULL,
+  created_by VARCHAR(50) NOT NULL DEFAULT 'system',
+  last_modified_by VARCHAR(50),
   INDEX(name),
   FOREIGN KEY (owner_id) REFERENCES owners(id),
   FOREIGN KEY (type_id) REFERENCES types(id)
@@ -51,5 +71,9 @@ CREATE TABLE IF NOT EXISTS visits (
   pet_id INT(4) UNSIGNED,
   visit_date DATE,
   description VARCHAR(255),
+  created_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  last_modified_date TIMESTAMP NULL,
+  created_by VARCHAR(50) NOT NULL DEFAULT 'system',
+  last_modified_by VARCHAR(50),
   FOREIGN KEY (pet_id) REFERENCES pets(id)
 ) engine=InnoDB;

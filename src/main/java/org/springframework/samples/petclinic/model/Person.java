@@ -25,7 +25,7 @@ import jakarta.validation.constraints.NotBlank;
  * @author Ken Krebs
  */
 @MappedSuperclass
-public class Person extends BaseEntity {
+public class Person extends BaseAuditable {
 
 	@Column(name = "first_name")
 	@NotBlank

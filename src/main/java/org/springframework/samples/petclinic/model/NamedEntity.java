@@ -20,15 +20,15 @@ import jakarta.persistence.MappedSuperclass;
 import jakarta.validation.constraints.NotBlank;
 
 /**
- * Simple JavaBean domain object adds a name property to <code>BaseEntity</code>. Used as
- * a base class for objects needing these properties.
+ * Simple JavaBean domain object adds a name property to <code>BaseAuditable</code>. Used
+ * as a base class for objects needing these properties.
  *
  * @author Ken Krebs
  * @author Juergen Hoeller
  * @author Wick Dynex
  */
 @MappedSuperclass
-public class NamedEntity extends BaseEntity {
+public class NamedEntity extends BaseAuditable {
 
 	@Column(name = "name")
 	@NotBlank

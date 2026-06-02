@@ -4,7 +4,9 @@
   "language": "java",
   "jvm_version": "17",
   "expected": {
-    "fail_to_pass": [],
+    "fail_to_pass": [
+      "org.springframework.samples.petclinic.AuditingTests"
+    ],
     "pass_to_pass": []
   },
   "environment": {
@@ -13,7 +15,9 @@
       "run_params": {
         "privileged": true,
         "network": "host",
-        "volumes": ["/var/run/docker.sock:/var/run/docker.sock"],
+        "volumes": [
+          "/var/run/docker.sock:/var/run/docker.sock"
+        ],
         "environment": {
           "TESTCONTAINERS_RYUK_DISABLED": "true",
           "TESTCONTAINERS_CHECKS_DISABLE": "true",

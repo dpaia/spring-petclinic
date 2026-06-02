@@ -4,7 +4,14 @@
   "language": "java",
   "jvm_version": "17",
   "expected": {
-    "fail_to_pass": [],
+    "fail_to_pass": [
+      "org.springframework.samples.petclinic.MigrationTest.testSpringBootVersion",
+      "org.springframework.samples.petclinic.MigrationTest.testLibraries",
+      "org.springframework.samples.petclinic.MigrationTest.testProperties",
+      "org.springframework.samples.petclinic.MigrationTest.testBeans",
+      "org.springframework.samples.petclinic.MigrationTest.testImports",
+      "org.springframework.samples.petclinic.MigrationTest.testRestTemplate"
+    ],
     "pass_to_pass": []
   },
   "environment": {

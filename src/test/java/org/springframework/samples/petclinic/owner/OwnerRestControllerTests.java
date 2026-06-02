@@ -220,7 +220,40 @@ class OwnerRestControllerTests {
 		mockMvc
 			.perform(post("/api/v1/owners").contentType(MediaType.APPLICATION_JSON).content("{\"firstName\":\"John\"}"))
 			// then
-			.andExpect(status().isBadRequest());
+			.andExpect(status().isBadRequest())
+			// verify custom validation error response format
+			.andExpect(jsonPath("$.timestamp").exists())
+			.andExpect(jsonPath("$.status", is(400)))
+			.andExpect(jsonPath("$.error", is("Validation Error")))
+			.andExpect(jsonPath("$.message", is("The request contains invalid data")))
+			.andExpect(jsonPath("$.fieldErrors").isArray())
+			// verify field errors for missing required fields
+			.andExpect(jsonPath("$.fieldErrors[?(@.field == 'lastName')].message").exists())
+			.andExpect(jsonPath("$.fieldErrors[?(@.field == 'address')].message").exists())
+			.andExpect(jsonPath("$.fieldErrors[?(@.field == 'city')].message").exists())
+			.andExpect(jsonPath("$.fieldErrors[?(@.field == 'telephone')].message").exists())
+			.andExpect(jsonPath("$.fieldErrors[?(@.field == 'email')].message").exists());
+
+		verify(this.ownerRepository, never()).save(any(Owner.class));
+	}
+
+	@Test
+	void testCreateOwnerInvalidFormatData() throws Exception {
+		// when - invalid format data
+		mockMvc.perform(post("/api/v1/owners").contentType(MediaType.APPLICATION_JSON)
+			.content(
+					"{\"firstName\":\"John\",\"lastName\":\"Doe\",\"address\":\"123 Main St\",\"city\":\"Anytown\",\"telephone\":\"invalid\",\"email\":\"invalid\"}"))
+			// then
+			.andExpect(status().isBadRequest())
+			// verify custom validation error response format
+			.andExpect(jsonPath("$.timestamp").exists())
+			.andExpect(jsonPath("$.status", is(400)))
+			.andExpect(jsonPath("$.error", is("Validation Error")))
+			.andExpect(jsonPath("$.message", is("The request contains invalid data")))
+			.andExpect(jsonPath("$.fieldErrors").isArray())
+			// verify field errors for invalid format fields
+			.andExpect(jsonPath("$.fieldErrors[?(@.field == 'telephone')].message").exists())
+			.andExpect(jsonPath("$.fieldErrors[?(@.field == 'email')].message").exists());
 
 		verify(this.ownerRepository, never()).save(any(Owner.class));
 	}

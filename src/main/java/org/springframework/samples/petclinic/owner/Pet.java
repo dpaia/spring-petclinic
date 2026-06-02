@@ -15,23 +15,16 @@
  */
 package org.springframework.samples.petclinic.owner;
 
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PastOrPresent;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.samples.petclinic.model.NamedEntity;
+
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Set;
-
-import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.samples.petclinic.model.NamedEntity;
-
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.OrderBy;
-import jakarta.persistence.Table;
 
 /**
  * Simple business object representing a pet.
@@ -47,10 +40,13 @@ public class Pet extends NamedEntity {
 
 	@Column(name = "birth_date")
 	@DateTimeFormat(pattern = "yyyy-MM-dd")
+	@NotNull(message = "{required}")
+	@PastOrPresent(message = "{typeMismatch.birthDate}")
 	private LocalDate birthDate;
 
 	@ManyToOne
 	@JoinColumn(name = "type_id")
+	@NotNull(message = "{required}")
 	private PetType type;
 
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)

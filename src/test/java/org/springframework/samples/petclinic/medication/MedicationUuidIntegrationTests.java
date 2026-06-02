@@ -54,4 +54,5 @@ class MedicationUuidIntegrationTests {
 		assertThat(s1.getId()).isNotEqualTo(s3.getId());
 		assertThat(s2.getId()).isNotEqualTo(s3.getId());
 	}
+
 }

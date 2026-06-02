@@ -18,6 +18,7 @@ package org.springframework.samples.petclinic.owner;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.r2dbc.repository.R2dbcRepository;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 /**
  * Repository class for <code>Owner</code> domain objects. All method names are compliant
@@ -41,5 +42,12 @@ public interface OwnerRepository extends R2dbcRepository<Owner, Integer> {
 	 * @return a Flux of matching {@link Owner}s (or an empty Flux if none found)
 	 */
 	Flux<Owner> findByLastNameStartingWith(String lastName, Pageable pageable);
+
+	/**
+	 * Count {@link Owner}s from the data store by last name prefix.
+	 * @param lastName Value to search for
+	 * @return a Mono containing the number of matching {@link Owner}s
+	 */
+	Mono<Long> countByLastNameStartingWith(String lastName);
 
 }

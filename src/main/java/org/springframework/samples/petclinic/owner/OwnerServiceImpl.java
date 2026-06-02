@@ -41,9 +41,9 @@ public class OwnerServiceImpl implements OwnerService {
 	@Override
 	public Mono<Tuple2<List<Owner>, Long>> findByLastNameStartingWithReactive(@Nullable String lastName,
 			Pageable pageable) {
-		Flux<Owner> owners = ownerRepository.findByLastNameStartingWith(lastName == null ? "" : lastName, pageable)
-			.flatMap(this::load);
-		return owners.collectList().zipWith(ownerRepository.count());
+		String lastNamePrefix = lastName == null ? "" : lastName;
+		Flux<Owner> owners = ownerRepository.findByLastNameStartingWith(lastNamePrefix, pageable).flatMap(this::load);
+		return owners.collectList().zipWith(ownerRepository.countByLastNameStartingWith(lastNamePrefix));
 	}
 
 	@Override

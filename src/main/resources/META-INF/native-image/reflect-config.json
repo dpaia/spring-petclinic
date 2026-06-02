@@ -1,0 +1,18 @@
+[
+  {
+    "name": "org.springframework.samples.petclinic.breed.BreedService$BreedListResponse",
+    "allDeclaredFields": true,
+    "allDeclaredMethods": true,
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "org.springframework.samples.petclinic.breed.BreedService$BreedImageResponse",
+    "allDeclaredFields": true,
+    "allDeclaredMethods": true,
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "java.util.List",
+    "allDeclaredMethods": true
+  }
+]

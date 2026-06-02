@@ -1,0 +1,36 @@
+{
+  "resources": {
+    "includes": [
+      {
+        "pattern": "db/.*"
+      },
+      {
+        "pattern": "messages/.*"
+      },
+      {
+        "pattern": "mysql-default-conf"
+      },
+      {
+        "pattern": "org/springframework/test/web/client/.*"
+      },
+      {
+        "pattern": "org/springframework/http/.*"
+      },
+      {
+        "pattern": "org/assertj/.*"
+      },
+      {
+        "pattern": "org/junit/.*"
+      },
+      {
+        "pattern": "junit-platform.properties"
+      },
+      {
+        "pattern": "META-INF/services/org.junit.platform.launcher.TestExecutionListener"
+      },
+      {
+        "pattern": "META-INF/services/org.junit.jupiter.api.extension.Extension"
+      }
+    ]
+  }
+}

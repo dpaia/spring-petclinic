@@ -1,0 +1,6 @@
+[
+  { "interfaces": ["org.springframework.http.client.ClientHttpRequestFactory"] },
+  { "interfaces": ["org.springframework.test.web.client.RequestMatcher"] },
+  { "interfaces": ["org.springframework.test.web.client.ResponseCreator"] },
+  { "interfaces": ["org.springframework.test.web.client.ResponseActions"] }
+]

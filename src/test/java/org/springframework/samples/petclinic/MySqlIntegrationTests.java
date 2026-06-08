@@ -24,13 +24,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.samples.petclinic.vet.VetRepository;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.aot.DisabledInAotMode;
 import org.springframework.web.client.RestTemplate;
 import org.testcontainers.containers.MySQLContainer;
@@ -45,9 +46,16 @@ import org.testcontainers.utility.DockerImageName;
 @DisabledInAotMode
 class MySqlIntegrationTests {
 
-	@ServiceConnection
 	@Container
 	static MySQLContainer<?> container = new MySQLContainer<>(DockerImageName.parse("mysql:9.2"));
+
+	@DynamicPropertySource
+	static void mysqlProperties(DynamicPropertyRegistry registry) {
+		registry.add("spring.r2dbc.url", () -> "r2dbc:mysql://%s:%d/%s?sslMode=DISABLED".formatted(container.getHost(),
+				container.getMappedPort(3306), container.getDatabaseName()));
+		registry.add("spring.r2dbc.username", container::getUsername);
+		registry.add("spring.r2dbc.password", container::getPassword);
+	}
 
 	@LocalServerPort
 	int port;

@@ -50,3 +50,8 @@ CREATE TABLE IF NOT EXISTS visits (
   description TEXT
 );
 CREATE INDEX ON visits (pet_id);
+
+CREATE TABLE IF NOT EXISTS medications (
+  id   VARCHAR(36) PRIMARY KEY,
+  name TEXT NOT NULL
+);

@@ -21,6 +21,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.util.function.Tuple2;
+
+import java.util.List;
 
 @Service
 @Transactional(readOnly = true)
@@ -36,9 +39,11 @@ public class OwnerServiceImpl implements OwnerService {
 	}
 
 	@Override
-	public Flux<Owner> findByLastNameStartingWithReactive(@Nullable String lastName, Pageable pageable) {
-		return ownerRepository.findByLastNameStartingWith(lastName == null ? "" : lastName, pageable)
+	public Mono<Tuple2<List<Owner>, Long>> findByLastNameStartingWithReactive(@Nullable String lastName,
+			Pageable pageable) {
+		Flux<Owner> owners = ownerRepository.findByLastNameStartingWith(lastName == null ? "" : lastName, pageable)
 			.flatMap(this::load);
+		return owners.collectList().zipWith(ownerRepository.count());
 	}
 
 	@Override

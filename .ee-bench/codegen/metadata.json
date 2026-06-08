@@ -1,0 +1,21 @@
+{
+  "instance_id": "dpaia__spring__petclinic-76",
+  "base_commit": "6f3dc469014774648f39b7304c11d5db85c22dd8",
+  "expected": {
+    "fail_to_pass": [
+      "org.springframework.samples.petclinic.owner.OwnerControllerTests#testPageWithPaginationWithNumberNotMultipleOf5",
+      "org.springframework.samples.petclinic.owner.OwnerControllerTests#testPageWithoutPagination",
+      "org.springframework.samples.petclinic.vet.VetControllerTests#testPageWithPagination"
+    ],
+    "pass_to_pass": [
+      "org.springframework.samples.petclinic.service.ClinicServiceTests"
+    ]
+  },
+  "issue_numbers": [
+    "76"
+  ],
+  "tags": [
+    "Controller",
+    "Reactive"
+  ]
+}

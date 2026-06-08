@@ -1,0 +1,16 @@
+{
+  "instance_id": "dpaia__spring__petclinic-8",
+  "base_commit": "82474ed4c2bdd9419bbb972513e7f21ba83f1abe",
+  "expected": {
+    "fail_to_pass": [
+      "MedicationUuidIntegrationTests"
+    ],
+    "pass_to_pass": []
+  },
+  "issue_numbers": [
+    "8"
+  ],
+  "tags": [
+    "JPA"
+  ]
+}

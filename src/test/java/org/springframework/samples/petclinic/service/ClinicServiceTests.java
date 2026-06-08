@@ -34,6 +34,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.samples.petclinic.vet.Vet;
 import org.springframework.samples.petclinic.vet.VetService;
+import reactor.util.function.Tuple2;
 
 /**
  * Integration test of the Service and the Repository layer.
@@ -89,13 +90,13 @@ class ClinicServiceTests {
 	@Test
 	void shouldFindOwnersByLastName() {
 		this.ownerService.findByLastNameStartingWithReactive("Davis", pageable)
-			.collectList()
+			.map(Tuple2::getT1)
 			.as(StepVerifier::create)
 			.expectNextMatches(owners -> owners.size() == 2)
 			.verifyComplete();
 
 		this.ownerService.findByLastNameStartingWithReactive("Daviss", pageable)
-			.collectList()
+			.map(Tuple2::getT1)
 			.as(StepVerifier::create)
 			.expectNextMatches(List::isEmpty)
 			.verifyComplete();
@@ -116,7 +117,7 @@ class ClinicServiceTests {
 	void shouldInsertOwner() {
 		// First, find existing owners with last name "Schultz"
 		this.ownerService.findByLastNameStartingWithReactive("Schultz", pageable)
-			.collectList()
+			.map(Tuple2::getT1)
 			.flatMap(existingOwners -> {
 				int found = existingOwners.size();
 
@@ -136,7 +137,7 @@ class ClinicServiceTests {
 
 					// Find owners again and verify count increased
 					return this.ownerService.findByLastNameStartingWithReactive("Schultz", pageable)
-						.collectList()
+						.map(Tuple2::getT1)
 						.flatMap(updatedOwners -> {
 							if (updatedOwners.size() != found + 1) {
 								return Mono.just(new AssertionError(
@@ -229,7 +230,7 @@ class ClinicServiceTests {
 	@Test
 	void shouldFindVets() {
 		this.vetService.findAllPaginatedReactive(pageable)
-			.collectList()
+			.map(Tuple2::getT1)
 			.as(StepVerifier::create)
 			.expectNextMatches(vets -> {
 				Vet vet = EntityUtils.getById(vets, Vet.class, 3);

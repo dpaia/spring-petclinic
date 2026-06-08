@@ -33,8 +33,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.server.ServerWebExchange;
 
 import jakarta.validation.Valid;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.util.function.Tuple2;
 
 /**
  * @author Juergen Hoeller
@@ -97,9 +97,10 @@ class OwnerController {
 	@GetMapping("/owners")
 	public Mono<String> processFindForm(@RequestParam(defaultValue = "1") int page, Owner owner, BindingResult result,
 			Model model) {
-		Mono<List<Owner>> owners = findPaginatedForOwnersLastNameReactive(page, owner.getLastName()).collectList();
 
-		return owners.map(ownersResults -> {
+		return findPaginatedForOwnersLastNameReactive(page, owner.getLastName()).map(tuple2 -> {
+			List<Owner> ownersResults = tuple2.getT1();
+			Long totalResults = tuple2.getT2();
 			if (ownersResults.isEmpty()) {
 				result.rejectValue("lastName", "notFound", "not found");
 				return "owners/findOwners";
@@ -110,19 +111,20 @@ class OwnerController {
 				return "redirect:/owners/" + foundOwner.getId();
 			}
 
-			return addPaginationModel(page, model, ownersResults);
+			return addPaginationModel(page, totalResults, model, ownersResults);
 		});
 	}
 
-	private String addPaginationModel(int page, Model model, List<Owner> listOwners) {
+	private String addPaginationModel(int page, Long totalItems, Model model, List<Owner> paginated) {
+		model.addAttribute("totalPages", (int) Math.ceil((double) totalItems / PAGE_SIZE));
 		model.addAttribute("currentPage", page);
-		// model.addAttribute("totalPages", paginated.getTotalPages());
-		// model.addAttribute("totalItems", paginated.getTotalElements());
-		model.addAttribute("listOwners", listOwners);
+		model.addAttribute("totalItems", totalItems);
+		model.addAttribute("listOwners", paginated);
 		return "owners/ownersList";
 	}
 
-	private Flux<Owner> findPaginatedForOwnersLastNameReactive(int page, @Nullable String lastname) {
+	private Mono<Tuple2<List<Owner>, Long>> findPaginatedForOwnersLastNameReactive(int page,
+			@Nullable String lastname) {
 		Pageable pageable = PageRequest.of(page - 1, PAGE_SIZE);
 		return ownerService.findByLastNameStartingWithReactive(lastname, pageable);
 	}

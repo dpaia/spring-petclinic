@@ -24,8 +24,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.util.function.Tuple2;
 
 /**
  * @author Juergen Hoeller
@@ -48,19 +48,18 @@ class VetController {
 	public Mono<String> showVetList(@RequestParam(defaultValue = "1") int page, Model model) {
 		// Here we are returning an object of type 'Vets' rather than a collection of Vet
 		// objects so it is simpler for Object-Xml mapping
-		Flux<Vet> vets = findPaginatedReactive(page);
-		return vets.collectList().map(listVets -> addPaginationModel(page, listVets, model));
+		return findPaginatedReactive(page).map(tuple -> addPaginationModel(page, tuple.getT2(), tuple.getT1(), model));
 	}
 
-	private String addPaginationModel(int page, List<Vet> listVets, Model model) {
+	private String addPaginationModel(int page, Long totalItems, List<Vet> paginated, Model model) {
+		model.addAttribute("totalPages", (int) Math.ceil((double) totalItems / PAGE_SIZE));
 		model.addAttribute("currentPage", page);
-		// model.addAttribute("totalPages", paginated.getTotalPages());
-		// model.addAttribute("totalItems", paginated.getTotalElements());
-		model.addAttribute("listVets", listVets);
+		model.addAttribute("totalItems", totalItems);
+		model.addAttribute("listVets", paginated);
 		return "vets/vetList";
 	}
 
-	private Flux<Vet> findPaginatedReactive(int page) {
+	private Mono<Tuple2<List<Vet>, Long>> findPaginatedReactive(int page) {
 		Pageable pageable = PageRequest.of(page - 1, PAGE_SIZE);
 		return vetService.findAllPaginatedReactive(pageable);
 	}

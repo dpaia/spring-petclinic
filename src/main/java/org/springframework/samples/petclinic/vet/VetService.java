@@ -16,8 +16,10 @@
 package org.springframework.samples.petclinic.vet;
 
 import org.springframework.data.domain.Pageable;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.util.function.Tuple2;
+
+import java.util.List;
 
 /**
  * Service for {@link Vet} domain objects.
@@ -26,6 +28,6 @@ public interface VetService {
 
 	Mono<Vets> getVetsAsListReactive();
 
-	Flux<Vet> findAllPaginatedReactive(Pageable pageable);
+	Mono<Tuple2<List<Vet>, Long>> findAllPaginatedReactive(Pageable pageable);
 
 }

@@ -68,4 +68,16 @@ class VetControllerTests {
 			.isEqualTo(1);
 	}
 
+	@Test
+	void testPageWithPagination() {
+		webTestClient.get()
+			.uri("/vets.html")
+			.exchange()
+			.expectStatus()
+			.isOk()
+			.expectBody()
+			.xpath("//a[@href='/vets.html?page=2' and text()='2']")
+			.exists();
+	}
+
 }

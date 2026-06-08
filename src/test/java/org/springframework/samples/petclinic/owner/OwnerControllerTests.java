@@ -24,6 +24,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.samples.petclinic.system.TestEnglishLocaleConfig;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.aot.DisabledInAotMode;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.BodyInserters;
@@ -58,6 +59,7 @@ class OwnerControllerTests {
 	}
 
 	@Test
+	@DirtiesContext
 	void testProcessCreationFormSuccess() {
 		webTestClient.post()
 			.uri("/owners/new")
@@ -152,6 +154,7 @@ class OwnerControllerTests {
 	}
 
 	@Test
+	@DirtiesContext
 	void testProcessUpdateOwnerFormSuccess() {
 		webTestClient.post()
 			.uri("/owners/{ownerId}/edit", 2)
@@ -227,6 +230,39 @@ class OwnerControllerTests {
 			.xpath("//th[normalize-space(text())='Telephone']/following-sibling::td[normalize-space(text())='6085551023']")
 			.exists()
 			.xpath("//dt[normalize-space(text())='Name']/following-sibling::dd[1][normalize-space(text())='Leo']")
+			.exists();
+	}
+
+	@Test
+	void testPageWithoutPagination() {
+		webTestClient.get()
+			.uri("/owners?page=1&lastName=Davis")
+			.exchange()
+			.expectStatus()
+			.isOk()
+			.expectBody()
+			.xpath("//a[@href='/owners?page=1' and text()='1']")
+			.doesNotExist();
+	}
+
+	@Test
+	@DirtiesContext
+	void testPageWithPaginationWithNumberNotMultipleOf5() {
+		webTestClient.post()
+			.uri("/owners/new")
+			.contentType(MediaType.APPLICATION_FORM_URLENCODED)
+			.bodyValue("firstName=Joe&lastName=Bloggs&address=123 Caramel Street&city=London&telephone=1316761638")
+			.exchange()
+			.expectStatus()
+			.is3xxRedirection();
+
+		webTestClient.get()
+			.uri("/owners")
+			.exchange()
+			.expectStatus()
+			.isOk()
+			.expectBody()
+			.xpath("//a[@href='/owners?page=3' and text()='3']")
 			.exists();
 	}
 

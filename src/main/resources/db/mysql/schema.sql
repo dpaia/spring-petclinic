@@ -46,10 +46,28 @@ CREATE TABLE IF NOT EXISTS pets (
   FOREIGN KEY (type_id) REFERENCES types(id)
 ) engine=InnoDB;
 
+CREATE TABLE IF NOT EXISTS medical_condition (
+  condition_code VARCHAR(255) NOT NULL,
+  locale VARCHAR(255) NOT NULL,
+  PRIMARY KEY (condition_code, locale)
+) engine=InnoDB;
+
+CREATE TABLE IF NOT EXISTS medical_condition_names (
+  medical_condition_code VARCHAR(255) NOT NULL,
+  medical_condition_locale VARCHAR(255) NOT NULL,
+  name VARCHAR(255),
+  FOREIGN KEY (medical_condition_code, medical_condition_locale)
+    REFERENCES medical_condition(condition_code, locale)
+) engine=InnoDB;
+
 CREATE TABLE IF NOT EXISTS visits (
   id INT(4) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
   pet_id INT(4) UNSIGNED,
   visit_date DATE,
   description VARCHAR(255),
-  FOREIGN KEY (pet_id) REFERENCES pets(id)
+  medical_condition_code VARCHAR(255),
+  medical_condition_locale VARCHAR(255),
+  FOREIGN KEY (pet_id) REFERENCES pets(id),
+  FOREIGN KEY (medical_condition_code, medical_condition_locale)
+    REFERENCES medical_condition(condition_code, locale)
 ) engine=InnoDB;

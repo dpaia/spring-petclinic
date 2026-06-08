@@ -113,9 +113,10 @@ class ClinicServiceTests {
 		Owner owner = new Owner();
 		owner.setFirstName("Sam");
 		owner.setLastName("Schultz");
-		owner.setAddress("4, Evans Street");
+		owner.setAddress("4 Evans Street");
 		owner.setCity("Wollongong");
 		owner.setTelephone("4444444444");
+		owner.setEmail("sam.schultz@example.com");
 		this.owners.save(owner);
 		assertThat(owner.getId()).isNotZero();
 

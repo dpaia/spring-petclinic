@@ -9,8 +9,8 @@
     <div class="form-group has-feedback">
       <input th:replace="~{fragments/inputField :: input (#{firstName}, 'firstName', 'text')}" />
       <input th:replace="~{fragments/inputField :: input (#{lastName}, 'lastName', 'text')}" />
-      <input th:replace="~{fragments/inputField :: input (#{address}, 'address', 'text')}" />
-      <input th:replace="~{fragments/inputField :: input (#{city}, 'city', 'text')}" />
+      <input th:replace="~{fragments/inputField :: input (#{address}, 'address.address', 'text')}" />
+      <input th:replace="~{fragments/inputField :: input (#{city}, 'address.city', 'text')}" />
       <input th:replace="~{fragments/inputField :: input (#{telephone}, 'telephone', 'text')}" />
     </div>
     <div class="form-group">

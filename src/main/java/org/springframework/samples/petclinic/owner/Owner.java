@@ -23,6 +23,7 @@ import org.springframework.core.style.ToStringCreator;
 import org.springframework.samples.petclinic.model.Person;
 import org.springframework.util.Assert;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.NotBlank;
 
@@ -41,7 +42,8 @@ import jakarta.validation.constraints.NotBlank;
 public class Owner extends Person {
 
 	@Embedded
-	private Address address;
+	@Valid
+	private Address address = new Address();
 
 	@Column(name = "telephone")
 	@NotBlank
@@ -59,6 +61,14 @@ public class Owner extends Person {
 
 	public void setAddress(Address address) {
 		this.address = address;
+	}
+
+	public String getCity() {
+		return this.address != null ? this.address.city() : null;
+	}
+
+	public void setCity(String city) {
+		this.address.setCity(city);
 	}
 
 	public String getTelephone() {

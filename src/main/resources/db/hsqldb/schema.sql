@@ -54,11 +54,29 @@ ALTER TABLE pets ADD CONSTRAINT fk_pets_owners FOREIGN KEY (owner_id) REFERENCES
 ALTER TABLE pets ADD CONSTRAINT fk_pets_types FOREIGN KEY (type_id) REFERENCES types (id);
 CREATE INDEX pets_name ON pets (name);
 
+CREATE TABLE medical_condition (
+  condition_code VARCHAR(255) NOT NULL,
+  locale         VARCHAR(255) NOT NULL,
+  CONSTRAINT pk_medical_condition PRIMARY KEY (condition_code, locale)
+);
+
+CREATE TABLE medical_condition_names (
+  medical_condition_code   VARCHAR(255) NOT NULL,
+  medical_condition_locale VARCHAR(255) NOT NULL,
+  name                     VARCHAR(255)
+);
+ALTER TABLE medical_condition_names ADD CONSTRAINT fk_medical_condition_names_on_medical_condition
+  FOREIGN KEY (medical_condition_code, medical_condition_locale) REFERENCES medical_condition (condition_code, locale);
+
 CREATE TABLE visits (
   id          INTEGER IDENTITY PRIMARY KEY,
   pet_id      INTEGER,
   visit_date  DATE,
-  description VARCHAR(255)
+  description VARCHAR(255),
+  medical_condition_code   VARCHAR(255),
+  medical_condition_locale VARCHAR(255)
 );
 ALTER TABLE visits ADD CONSTRAINT fk_visits_pets FOREIGN KEY (pet_id) REFERENCES pets (id);
+ALTER TABLE visits ADD CONSTRAINT fk_visits_medical_condition
+  FOREIGN KEY (medical_condition_code, medical_condition_locale) REFERENCES medical_condition (condition_code, locale);
 CREATE INDEX visits_pet_id ON visits (pet_id);

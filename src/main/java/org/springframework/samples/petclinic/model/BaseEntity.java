@@ -17,10 +17,8 @@ package org.springframework.samples.petclinic.model;
 
 import java.io.Serializable;
 
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.MappedSuperclass;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Column;
 
 /**
  * Simple JavaBean domain object with an id property. Used as a base class for objects
@@ -29,11 +27,10 @@ import jakarta.persistence.MappedSuperclass;
  * @author Ken Krebs
  * @author Juergen Hoeller
  */
-@MappedSuperclass
 public class BaseEntity implements Serializable {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column("id")
 	private Integer id;
 
 	public Integer getId() {

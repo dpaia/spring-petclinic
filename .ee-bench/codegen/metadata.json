@@ -1,0 +1,20 @@
+{
+  "instance_id": "dpaia__spring__petclinic-71",
+  "base_commit": "30aab0ae764ad845b5eedd76028756835fec771f",
+  "expected": {
+    "fail_to_pass": [
+      "org.springframework.samples.petclinic.vet.R2dbcVetRepositoryTests",
+      "org.springframework.samples.petclinic.owner.R2dbcVisitRepositoryTests",
+      "org.springframework.samples.petclinic.owner.R2dbcPetRepositoryTests",
+      "org.springframework.samples.petclinic.owner.R2dbcOwnerRepositoryTests"
+    ],
+    "pass_to_pass": []
+  },
+  "issue_numbers": [
+    "71"
+  ],
+  "tags": [
+    "Data",
+    "Reactive"
+  ]
+}

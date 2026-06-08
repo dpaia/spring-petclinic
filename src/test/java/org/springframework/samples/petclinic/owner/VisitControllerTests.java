@@ -16,6 +16,7 @@
 
 package org.springframework.samples.petclinic.owner;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -31,6 +32,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.aot.DisabledInAotMode;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import reactor.core.publisher.Mono;
 
 import java.util.Optional;
 
@@ -61,7 +63,7 @@ class VisitControllerTests {
 		Pet pet = new Pet();
 		owner.addPet(pet);
 		pet.setId(TEST_PET_ID);
-		given(this.owners.findById(TEST_OWNER_ID)).willReturn(Optional.of(owner));
+		given(this.owners.findById(TEST_OWNER_ID)).willReturn(Mono.just(owner));
 	}
 
 	@Test
@@ -73,6 +75,10 @@ class VisitControllerTests {
 
 	@Test
 	void testProcessNewVisitFormSuccess() throws Exception {
+		var newOwner = new Owner();
+		newOwner.setId(TEST_OWNER_ID);
+		given(this.owners.save(any(Owner.class))).willReturn(Mono.just(new Owner()));
+
 		mockMvc
 			.perform(post("/owners/{ownerId}/pets/{petId}/visits/new", TEST_OWNER_ID, TEST_PET_ID)
 				.param("name", "George")

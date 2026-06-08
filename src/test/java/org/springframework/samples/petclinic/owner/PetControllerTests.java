@@ -24,16 +24,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
-import org.springframework.samples.petclinic.owner.PetTypeRepository;
-import org.springframework.samples.petclinic.owner.OwnerRepository;
 import org.springframework.test.context.aot.DisabledInAotMode;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -71,7 +70,7 @@ class PetControllerTests {
 		PetType cat = new PetType();
 		cat.setId(3);
 		cat.setName("hamster");
-		given(this.types.findPetTypes()).willReturn(List.of(cat));
+		given(this.types.findPetTypes()).willReturn(Flux.just(cat));
 
 		Owner owner = new Owner();
 		Pet pet = new Pet();
@@ -82,7 +81,7 @@ class PetControllerTests {
 		dog.setId(TEST_PET_ID + 1);
 		pet.setName("petty");
 		dog.setName("doggy");
-		given(this.owners.findById(TEST_OWNER_ID)).willReturn(Optional.of(owner));
+		given(this.owners.findById(TEST_OWNER_ID)).willReturn(Mono.just(owner));
 	}
 
 	@Test
@@ -95,6 +94,10 @@ class PetControllerTests {
 
 	@Test
 	void testProcessCreationFormSuccess() throws Exception {
+		var newOwner = new Owner();
+		newOwner.setId(TEST_OWNER_ID);
+		given(this.owners.save(any(Owner.class))).willReturn(Mono.just(new Owner()));
+
 		mockMvc
 			.perform(post("/owners/{ownerId}/pets/new", TEST_OWNER_ID).param("name", "Betty")
 				.param("type", "hamster")
@@ -173,6 +176,10 @@ class PetControllerTests {
 
 	@Test
 	void testProcessUpdateFormSuccess() throws Exception {
+		var newOwner = new Owner();
+		newOwner.setId(TEST_OWNER_ID);
+		given(this.owners.save(any(Owner.class))).willReturn(Mono.just(new Owner()));
+
 		mockMvc
 			.perform(post("/owners/{ownerId}/pets/{petId}/edit", TEST_OWNER_ID, TEST_PET_ID).param("name", "Betty")
 				.param("type", "hamster")

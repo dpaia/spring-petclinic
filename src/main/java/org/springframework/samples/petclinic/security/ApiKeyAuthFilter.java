@@ -8,7 +8,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
@@ -17,7 +16,6 @@ import java.io.IOException;
  * Filter for API key based authentication. This filter extracts the API key from the
  * X-API-KEY header and authenticates the request.
  */
-@Component
 public class ApiKeyAuthFilter extends OncePerRequestFilter {
 
 	private static final String API_KEY_HEADER = "X-API-KEY";
@@ -26,6 +24,11 @@ public class ApiKeyAuthFilter extends OncePerRequestFilter {
 
 	public ApiKeyAuthFilter(AuthenticationManager authenticationManager) {
 		this.authenticationManager = authenticationManager;
+	}
+
+	@Override
+	protected boolean shouldNotFilter(HttpServletRequest request) {
+		return !request.getRequestURI().startsWith("/partners/");
 	}
 
 	@Override

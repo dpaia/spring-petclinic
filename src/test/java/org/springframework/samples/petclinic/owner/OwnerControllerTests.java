@@ -241,7 +241,7 @@ class OwnerControllerTests {
 		owner.setId(2);
 		owner.setFirstName("John");
 		owner.setLastName("Doe");
-		owner.setAddress("Center Street");
+		owner.setAddress("123 Center Street");
 		owner.setCity("New York");
 		owner.setTelephone("0123456789");
 		owner.setEmail("john.doe@example.com");

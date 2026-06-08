@@ -30,6 +30,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import reactor.core.publisher.Flux;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
@@ -73,9 +74,8 @@ class VetControllerTests {
 
 	@BeforeEach
 	void setup() {
-		given(this.vets.findAll()).willReturn(Lists.newArrayList(james(), helen()));
-		given(this.vets.findAll(any(Pageable.class)))
-			.willReturn(new PageImpl<Vet>(Lists.newArrayList(james(), helen())));
+		given(this.vets.findAll()).willReturn(Flux.just(james(), helen()));
+		given(this.vets.findAllBy(any(Pageable.class))).willReturn(Flux.just(james(), helen()));
 
 	}
 

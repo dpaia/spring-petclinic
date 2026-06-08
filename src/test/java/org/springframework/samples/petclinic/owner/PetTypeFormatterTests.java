@@ -32,6 +32,7 @@ import org.junit.jupiter.api.condition.DisabledInNativeImage;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import reactor.core.publisher.Flux;
 
 /**
  * Test class for {@link PetTypeFormatter}
@@ -79,7 +80,7 @@ class PetTypeFormatterTests {
 	 * Helper method to produce some sample pet types just for test purpose
 	 * @return {@link Collection} of {@link PetType}
 	 */
-	private List<PetType> makePetTypes() {
+	private Flux<PetType> makePetTypes() {
 		List<PetType> petTypes = new ArrayList<>();
 		petTypes.add(new PetType() {
 			{
@@ -91,7 +92,7 @@ class PetTypeFormatterTests {
 				setName("Bird");
 			}
 		});
-		return petTypes;
+		return Flux.fromIterable(petTypes);
 	}
 
 }

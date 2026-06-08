@@ -57,12 +57,12 @@ class PetController {
 
 	@ModelAttribute("types")
 	public Collection<PetType> populatePetTypes() {
-		return this.types.findPetTypes();
+		return this.types.findPetTypes().collectList().block();
 	}
 
 	@ModelAttribute("owner")
 	public Owner findOwner(@PathVariable("ownerId") int ownerId) {
-		Optional<Owner> optionalOwner = this.owners.findById(ownerId);
+		Optional<Owner> optionalOwner = this.owners.findById(ownerId).blockOptional();
 		Owner owner = optionalOwner.orElseThrow(() -> new IllegalArgumentException(
 				"Owner not found with id: " + ownerId + ". Please ensure the ID is correct "));
 		return owner;
@@ -76,7 +76,7 @@ class PetController {
 			return new Pet();
 		}
 
-		Optional<Owner> optionalOwner = this.owners.findById(ownerId);
+		Optional<Owner> optionalOwner = this.owners.findById(ownerId).blockOptional();
 		Owner owner = optionalOwner.orElseThrow(() -> new IllegalArgumentException(
 				"Owner not found with id: " + ownerId + ". Please ensure the ID is correct "));
 		return owner.getPet(petId);
@@ -116,7 +116,7 @@ class PetController {
 		}
 
 		owner.addPet(pet);
-		this.owners.save(owner);
+		this.owners.save(owner).block();
 		redirectAttributes.addFlashAttribute("message", "New Pet has been Added");
 		return "redirect:/owners/{ownerId}";
 	}
@@ -170,7 +170,7 @@ class PetController {
 		else {
 			owner.addPet(pet);
 		}
-		this.owners.save(owner);
+		this.owners.save(owner).block();
 	}
 
 }

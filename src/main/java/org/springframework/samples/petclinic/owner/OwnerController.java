@@ -63,6 +63,7 @@ class OwnerController {
 	public Owner findOwner(@PathVariable(name = "ownerId", required = false) Integer ownerId) {
 		return ownerId == null ? new Owner()
 				: this.owners.findById(ownerId)
+					.blockOptional()
 					.orElseThrow(() -> new IllegalArgumentException("Owner not found with id: " + ownerId
 							+ ". Please ensure the ID is correct " + "and the owner exists in the database."));
 	}
@@ -79,7 +80,7 @@ class OwnerController {
 			return VIEWS_OWNER_CREATE_OR_UPDATE_FORM;
 		}
 
-		this.owners.save(owner);
+		this.owners.save(owner).block();
 		redirectAttributes.addFlashAttribute("message", "New Owner Created");
 		return "redirect:/owners/" + owner.getId();
 	}
@@ -98,14 +99,14 @@ class OwnerController {
 		}
 
 		// find owners by last name
-		Page<Owner> ownersResults = findPaginatedForOwnersLastName(page, owner.getLastName());
+		List<Owner> ownersResults = findPaginatedForOwnersLastName(page, owner.getLastName());
 		if (ownersResults.isEmpty()) {
 			// no owners found
 			result.rejectValue("lastName", "notFound", "not found");
 			return "owners/findOwners";
 		}
 
-		if (ownersResults.getTotalElements() == 1) {
+		if (ownersResults.size() == 1) {
 			// 1 owner found
 			owner = ownersResults.iterator().next();
 			return "redirect:/owners/" + owner.getId();
@@ -115,19 +116,18 @@ class OwnerController {
 		return addPaginationModel(page, model, ownersResults);
 	}
 
-	private String addPaginationModel(int page, Model model, Page<Owner> paginated) {
-		List<Owner> listOwners = paginated.getContent();
+	private String addPaginationModel(int page, Model model, List<Owner> listOwners) {
 		model.addAttribute("currentPage", page);
-		model.addAttribute("totalPages", paginated.getTotalPages());
-		model.addAttribute("totalItems", paginated.getTotalElements());
+		// model.addAttribute("totalPages", paginated.getTotalPages());
+		// model.addAttribute("totalItems", paginated.getTotalElements());
 		model.addAttribute("listOwners", listOwners);
 		return "owners/ownersList";
 	}
 
-	private Page<Owner> findPaginatedForOwnersLastName(int page, String lastname) {
+	private List<Owner> findPaginatedForOwnersLastName(int page, String lastname) {
 		int pageSize = 5;
 		Pageable pageable = PageRequest.of(page - 1, pageSize);
-		return owners.findByLastNameStartingWith(lastname, pageable);
+		return owners.findByLastNameStartingWith(lastname, pageable).collectList().block();
 	}
 
 	@GetMapping("/owners/{ownerId}/edit")
@@ -150,7 +150,7 @@ class OwnerController {
 		}
 
 		owner.setId(ownerId);
-		this.owners.save(owner);
+		this.owners.save(owner).block();
 		redirectAttributes.addFlashAttribute("message", "Owner Values Updated");
 		return "redirect:/owners/{ownerId}";
 	}
@@ -163,7 +163,7 @@ class OwnerController {
 	@GetMapping("/owners/{ownerId}")
 	public ModelAndView showOwner(@PathVariable("ownerId") int ownerId) {
 		ModelAndView mav = new ModelAndView("owners/ownerDetails");
-		Optional<Owner> optionalOwner = this.owners.findById(ownerId);
+		Optional<Owner> optionalOwner = this.owners.findById(ownerId).blockOptional();
 		Owner owner = optionalOwner.orElseThrow(() -> new IllegalArgumentException(
 				"Owner not found with id: " + ownerId + ". Please ensure the ID is correct "));
 		mav.addObject(owner);

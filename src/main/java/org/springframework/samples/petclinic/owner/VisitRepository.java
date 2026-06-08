@@ -13,26 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.samples.petclinic.owner;
 
-import org.springframework.data.r2dbc.repository.Query;
 import org.springframework.data.r2dbc.repository.R2dbcRepository;
 import reactor.core.publisher.Flux;
 
-/**
- * Repository class for <code>PetType</code> domain objects.
- *
- * @author Patrick Baumgartner
- */
+public interface VisitRepository extends R2dbcRepository<Visit, Integer> {
 
-public interface PetTypeRepository extends R2dbcRepository<PetType, Integer> {
-
-	/**
-	 * Retrieve all {@link PetType}s from the data store ordered by name.
-	 * @return a Flux of {@link PetType}s.
-	 */
-	@Query("SELECT ptype FROM PetType ptype ORDER BY ptype.name")
-	Flux<PetType> findPetTypes();
+	Flux<Visit> findByPetId(Integer petId);
 
 }

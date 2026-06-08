@@ -1,0 +1,17 @@
+{
+  "instance_id": "dpaia__spring__petclinic-73",
+  "base_commit": "399850b79e354992140d519e3a5107ce0cdbf851",
+  "expected": {
+    "fail_to_pass": [
+      "org.springframework.samples.petclinic.owner.OwnerServiceTransactionTest"
+    ],
+    "pass_to_pass": []
+  },
+  "issue_numbers": [
+    "73"
+  ],
+  "tags": [
+    "Transaction",
+    "Reactive"
+  ]
+}

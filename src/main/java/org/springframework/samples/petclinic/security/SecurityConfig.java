@@ -36,18 +36,18 @@ public class SecurityConfig {
 		http.csrf(AbstractHttpConfigurer::disable)
 			.authorizeHttpRequests(auth -> auth
 				// ADMIN role required for modifying operations
-				.requestMatchers(HttpMethod.POST, "/**")
+				.requestMatchers(HttpMethod.POST, "/api/**")
 				.hasRole("ADMIN")
-				.requestMatchers(HttpMethod.PUT, "/**")
+				.requestMatchers(HttpMethod.PUT, "/api/**")
 				.hasRole("ADMIN")
-				.requestMatchers(HttpMethod.DELETE, "/**")
+				.requestMatchers(HttpMethod.DELETE, "/api/**")
 				.hasRole("ADMIN")
 				// USER role required for read operations
-				.requestMatchers(HttpMethod.GET, "/**")
+				.requestMatchers(HttpMethod.GET, "/api/**")
 				.hasRole("USER")
-				// Any other request requires authentication
+				// Keep the existing Petclinic UI and actuator behavior public.
 				.anyRequest()
-				.authenticated())
+				.permitAll())
 			.httpBasic(Customizer.withDefaults())
 			.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 

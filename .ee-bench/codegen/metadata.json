@@ -6,10 +6,11 @@
   "build_system": "maven",
   "expected": {
     "fail_to_pass": [
-      "org.springframework.samples.petclinic.model.ValidatorTests#shouldNotValidateWhenAddressFormatIsInvalid",
-      "org.springframework.samples.petclinic.model.ValidatorTests#shouldValidateWhenAddressFormatIsValid"
+      "org.springframework.samples.petclinic.model.ValidatorTests#shouldNotValidateWhenAddressFormatIsInvalid"
     ],
-    "pass_to_pass": []
+    "pass_to_pass": [
+      "org.springframework.samples.petclinic.model.ValidatorTests#shouldValidateWhenAddressFormatIsValid"
+    ]
   },
   "environment": {
     "project_root": "/repo",
